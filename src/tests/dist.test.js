@@ -60,7 +60,7 @@ w.document.addEventListener("DOMContentLoaded", function () {
     };
     ok(
       "dist renders the tabs",
-      q("#tabs .tab").length === 7,
+      q("#tabs .tab").length === 6,
       "" + q("#tabs .tab").length,
     );
     ok(

@@ -2860,59 +2860,6 @@ if (typeof module !== "undefined" && module.exports) {
 
   /* ---------------- tab: scope ---------------- */
 
-  function nextTab() {
-    var wrap = el("div", {});
-    function block(title, items, tone) {
-      var b = el("div", { class: "insight " + (tone || "") });
-      b.appendChild(el("h3", { text: title }));
-      var ul = el("ul", {});
-      items.forEach(function (i) {
-        ul.appendChild(el("li", { text: i }));
-      });
-      b.appendChild(ul);
-      return b;
-    }
-    wrap.appendChild(
-      block("In this version", [
-        "The seven-product case of the organization design lecture, with its routings, demand for each of four years, demand variability, process times and machine footprints, all editable on the page.",
-        "Required processors and utilization per centre, computed from demand and times alone.",
-        "Capacity sized on the mean or for a stated robustness, and what that robustness costs in machines.",
-        "The wait in front of every station and the parts standing in it, from Erlang C on its offered load.",
-        "Six organizations: product, group, fractal, function, process and holographic, with the groups, the composite centres and the number of fractal centres formed on the page.",
-        "The organizational network, with the parts crossing between centres and the parts that never leave one.",
-        "Two levels of layout — the processors inside a centre, the centres inside the building — and the travel and floor area they imply.",
-        "Four years of demand in which one product is withdrawn, the machines bought, moved and retired between them, and what the change costs.",
-        "A case that can be saved to a file, loaded back, and reset to the lecture case.",
-        "A standing check that Year 1 on the mean still reproduces the processor counts drawn on slide 19.",
-      ]),
-    );
-    wrap.appendChild(
-      block(
-        "Not here yet",
-        [
-          "Work in process held between machines and between centres.",
-          "Operators and operating cost, as against floor and capital.",
-          "Setup times, which the lecture sets aside for now.",
-          "Designs proposed by the tool rather than described to it.",
-        ],
-        "insight-soft",
-      ),
-    );
-    wrap.appendChild(
-      block(
-        "What the numbers rest on",
-        [
-          "The seven products, their routings and the processor counts the tool is calibrated against are read off slides 3 and 19 of the organization design lecture, after Montreuil & Lefrancois (1996).",
-          "A period is one 20-hour workday at 80% processor efficiency, the convention of slide 64.",
-          "Demand and process times are synthetic. They were fitted by reverse calibration until the function organization in Year 1 computes exactly the counts drawn on slide 19, and the page re-checks that on every edit.",
-          "Machine footprints, the relocation price and the purchase price rest on judgement alone. Nothing on the slides fixes them, and the figures used here are meant to be replaced.",
-        ],
-        "insight-ask",
-      ),
-    );
-    return wrap;
-  }
-
   /* ---------------- carrying a case away ----------------
    *
    * The whole case travels as one JSON file, so a variant can be built in the
@@ -2994,7 +2941,6 @@ if (typeof module !== "undefined" && module.exports) {
     ["years", "Over the years", yearsTab],
     ["compare", "Compare", compareTab],
     ["case", "The case", caseTab],
-    ["next", "Scope and questions", nextTab],
   ];
 
   function render() {

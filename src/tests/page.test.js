@@ -67,8 +67,8 @@ function machines() {
 
 /* ---- the shell ---- */
 ok(
-  "seven tabs rendered",
-  all("#tabs .tab").length === 7,
+  "six tabs rendered",
+  all("#tabs .tab").length === 6,
   "" + all("#tabs .tab").length,
 );
 ok("capacity is the tab open", $("#tabs .tab-on").textContent === "Capacity");
@@ -251,39 +251,17 @@ tab("The case");
 all("input.dem")[3].value = "690";
 all("input.dem")[3].dispatchEvent(new w.Event("change", { bubbles: true }));
 
-/* ---- scope ---- */
-tab("Scope and questions");
-ok("scope lists what is here", /In this version/.test(text()));
-ok("scope lists what is missing", /Not here yet/.test(text()));
-ok("scope mentions the queue model", /Erlang C/.test(text()));
+/* ---- the scope page is gone: six tabs, and no notes to the professor ---- */
+ok("six tabs", all("#tabs .tab").length === 6, "" + all("#tabs .tab").length);
 ok(
-  "scope says what the numbers rest on",
-  /What the numbers rest on/.test(text()),
+  "no scope tab",
+  !all("#tabs .tab").some(function (t) {
+    return /Scope/.test(t.textContent);
+  }),
 );
 ok(
-  "scope no longer carries questions for the professor",
+  "no questions for the professor anywhere in the page",
   !/Open questions/.test(text()),
-);
-ok(
-  "scope no longer claims layout is missing",
-  !/Layout: equipment inside a centre/.test(text()),
-);
-ok(
-  "scope no longer claims travel is missing",
-  !/Travel distance and traffic/.test(text()),
-);
-ok(
-  "scope no longer claims the groups are fixed",
-  !/Letting the user form the groups/.test(text()),
-);
-ok(
-  "scope lists the two levels of layout as done",
-  /Two levels of layout/.test(text()),
-);
-ok("scope lists the saved case as done", /saved to a file/.test(text()));
-ok(
-  "scope is honest about the footprints",
-  /rest on judgement alone/.test(text()),
 );
 
 /* ---- layout ---- */

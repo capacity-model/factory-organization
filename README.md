@@ -215,7 +215,7 @@ cd src && node build_standalone.js
 cd src && ./tests/run.sh
 ```
 
-420 checks across three suites: the engine, the calibration, the robustness
+417 checks across three suites: the engine, the calibration, the robustness
 model, Erlang C, the flow model, the two layout packers and the yearly timeline;
 the page under `jsdom`, driven through every tab and control; and the built
 single file. The layout checks assert that no two centres overlap, that every
