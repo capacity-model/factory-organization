@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Factory Organization Designer</title>
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --card: #ffffff;
+        --ink: #1d2733;
+        --dim: #5d6a79;
+        --line: #dde3ea;
+        --accent: #1f5fa8;
+        --ok: #1f8a4c;
+        --ok-bg: #eef8f1;
+        --off: #b4761a;
+        --off-bg: #fdf6e8;
+        --low: #d0574e;
+        --mid: #d6a033;
+        --high: #3f8f5e;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          14px/1.5 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+      }
+      header {
+        background: var(--card);
+        border-bottom: 1px solid var(--line);
+        padding: 18px 24px 0;
+      }
+      h1 {
+        margin: 0;
+        font-size: 19px;
+        letter-spacing: 0.2px;
+      }
+      .sub {
+        margin: 4px 0 14px;
+        color: var(--dim);
+        font-size: 13px;
+      }
+      #tabs {
+        display: flex;
+        gap: 2px;
+        flex-wrap: wrap;
+      }
+      .tab {
+        border: 1px solid var(--line);
+        border-bottom: none;
+        background: #eef1f5;
+        color: var(--dim);
+        padding: 8px 14px;
+        border-radius: 6px 6px 0 0;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .tab-on {
+        background: var(--card);
+        color: var(--ink);
+        font-weight: 600;
+      }
+      main {
+        padding: 20px 24px 60px;
+        max-width: 1180px;
+      }
+
+      .banner {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 18px;
+      }
+      .banner-ok {
+        background: var(--ok-bg);
+        border-color: #bfe3cc;
+      }
+      .banner-off {
+        background: var(--off-bg);
+        border-color: #ecd9ad;
+      }
+      .banner-head {
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      .banner-ok .banner-head {
+        color: var(--ok);
+      }
+      .banner-off .banner-head {
+        color: var(--off);
+      }
+      .chips {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 4px 10px;
+      }
+      .chip-ok {
+        border-color: #bfe3cc;
+      }
+      .chip-off {
+        border-color: #e3b7b3;
+      }
+      .chip-sub {
+        color: var(--dim);
+        font-size: 12px;
+      }
+
+      .picker {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .pick {
+        border: 1px solid var(--line);
+        background: var(--card);
+        color: var(--dim);
+        padding: 7px 13px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .pick-on {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+        font-weight: 600;
+      }
+      .blurb {
+        color: var(--dim);
+        margin: 0 0 16px;
+        max-width: 760px;
+      }
+
+      .stats {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+      }
+      .stat {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        min-width: 130px;
+      }
+      .stat-k {
+        color: var(--dim);
+        font-size: 12px;
+      }
+      .stat-v {
+        font-size: 20px;
+        font-weight: 600;
+        margin-top: 2px;
+      }
+
+      .centres {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+        gap: 12px;
+      }
+      .centre {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+      }
+      .centre-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 6px;
+        margin-bottom: 6px;
+      }
+      .centre-id {
+        font-weight: 600;
+      }
+      .centre-n {
+        color: var(--dim);
+        font-size: 12px;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      .mini td {
+        padding: 3px 2px;
+        vertical-align: middle;
+      }
+      .big {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .big th,
+      .big td {
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--line);
+      }
+      .big th {
+        background: #eef1f5;
+        font-size: 12px;
+        color: var(--dim);
+        font-weight: 600;
+      }
+      .big tr:last-child td {
+        border-bottom: none;
+      }
+      .row-on {
+        background: #f2f7fd;
+      }
+      .l {
+        text-align: left;
+      }
+      .r {
+        text-align: right;
+      }
+      .strong {
+        font-weight: 600;
+      }
+      .wide {
+        width: 34%;
+      }
+
+      .bar {
+        position: relative;
+        display: block;
+        height: 15px;
+        background: #eef1f5;
+        border-radius: 3px;
+        overflow: hidden;
+        min-width: 70px;
+      }
+      .bar-wide {
+        height: 11px;
+      }
+      .bar-fill {
+        position: absolute;
+        inset: 0 auto 0 0;
+        border-radius: 3px;
+      }
+      .bar-low {
+        background: var(--low);
+      }
+      .bar-mid {
+        background: var(--mid);
+      }
+      .bar-high {
+        background: var(--high);
+      }
+      .bar-count {
+        background: var(--accent);
+        opacity: 0.75;
+      }
+      .bar-text {
+        position: relative;
+        display: block;
+        text-align: right;
+        padding-right: 4px;
+        font-size: 11px;
+        color: #27313c;
+        line-height: 15px;
+      }
+
+      .oplab {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .glyph {
+        vertical-align: middle;
+        flex: none;
+      }
+      .route {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        flex-wrap: wrap;
+      }
+      .step {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        background: #f2f5f8;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        padding: 2px 6px;
+      }
+      .step-t {
+        font-size: 11px;
+        color: var(--dim);
+      }
+      .arrow {
+        color: #9aa7b4;
+      }
+      .dem {
+        width: 86px;
+        text-align: right;
+        padding: 4px 6px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        font: inherit;
+      }
+
+      .insight {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 18px 0;
+        max-width: 830px;
+      }
+      .insight-soft {
+        border-left-color: #9aa7b4;
+      }
+      .insight-ask {
+        border-left-color: var(--off);
+      }
+      .insight h3 {
+        margin: 0 0 8px;
+        font-size: 14px;
+      }
+      .insight p,
+      .insight li {
+        color: var(--dim);
+        margin: 6px 0;
+      }
+      .insight ul {
+        margin: 6px 0;
+        padding-left: 18px;
+      }
+      .note {
+        color: var(--dim);
+        font-size: 12.5px;
+        max-width: 830px;
+        margin: 12px 0 0;
+      }
+      .h3 {
+        font-size: 14px;
+        margin: 22px 0 8px;
+      }
+      .legend {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+      .leg {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--dim);
+        font-size: 12.5px;
+      }
+
+      @media (max-width: 640px) {
+        header,
+        main {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Factory Organization Designer</h1>
+      <p class="sub">
+        The seven-product case from the organization design lecture, with the
+        numbers attached — ISyE 6202 / 6335, version 1
+      </p>
+      <nav id="tabs"></nav>
+    </header>
+    <main id="body"></main>
+    <script src="case.js"></script>
+    <script src="engine.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

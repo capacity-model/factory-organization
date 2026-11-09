@@ -1,0 +1,1314 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Factory Organization Designer</title>
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --card: #ffffff;
+        --ink: #1d2733;
+        --dim: #5d6a79;
+        --line: #dde3ea;
+        --accent: #1f5fa8;
+        --ok: #1f8a4c;
+        --ok-bg: #eef8f1;
+        --off: #b4761a;
+        --off-bg: #fdf6e8;
+        --low: #d0574e;
+        --mid: #d6a033;
+        --high: #3f8f5e;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          14px/1.5 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+      }
+      header {
+        background: var(--card);
+        border-bottom: 1px solid var(--line);
+        padding: 18px 24px 0;
+      }
+      h1 {
+        margin: 0;
+        font-size: 19px;
+        letter-spacing: 0.2px;
+      }
+      .sub {
+        margin: 4px 0 14px;
+        color: var(--dim);
+        font-size: 13px;
+      }
+      #tabs {
+        display: flex;
+        gap: 2px;
+        flex-wrap: wrap;
+      }
+      .tab {
+        border: 1px solid var(--line);
+        border-bottom: none;
+        background: #eef1f5;
+        color: var(--dim);
+        padding: 8px 14px;
+        border-radius: 6px 6px 0 0;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .tab-on {
+        background: var(--card);
+        color: var(--ink);
+        font-weight: 600;
+      }
+      main {
+        padding: 20px 24px 60px;
+        max-width: 1180px;
+      }
+
+      .banner {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 18px;
+      }
+      .banner-ok {
+        background: var(--ok-bg);
+        border-color: #bfe3cc;
+      }
+      .banner-off {
+        background: var(--off-bg);
+        border-color: #ecd9ad;
+      }
+      .banner-head {
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      .banner-ok .banner-head {
+        color: var(--ok);
+      }
+      .banner-off .banner-head {
+        color: var(--off);
+      }
+      .chips {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 4px 10px;
+      }
+      .chip-ok {
+        border-color: #bfe3cc;
+      }
+      .chip-off {
+        border-color: #e3b7b3;
+      }
+      .chip-sub {
+        color: var(--dim);
+        font-size: 12px;
+      }
+
+      .picker {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .pick {
+        border: 1px solid var(--line);
+        background: var(--card);
+        color: var(--dim);
+        padding: 7px 13px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .pick-on {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+        font-weight: 600;
+      }
+      .blurb {
+        color: var(--dim);
+        margin: 0 0 16px;
+        max-width: 760px;
+      }
+
+      .stats {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+      }
+      .stat {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        min-width: 130px;
+      }
+      .stat-k {
+        color: var(--dim);
+        font-size: 12px;
+      }
+      .stat-v {
+        font-size: 20px;
+        font-weight: 600;
+        margin-top: 2px;
+      }
+
+      .centres {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+        gap: 12px;
+      }
+      .centre {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+      }
+      .centre-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 6px;
+        margin-bottom: 6px;
+      }
+      .centre-id {
+        font-weight: 600;
+      }
+      .centre-n {
+        color: var(--dim);
+        font-size: 12px;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      .mini td {
+        padding: 3px 2px;
+        vertical-align: middle;
+      }
+      .big {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .big th,
+      .big td {
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--line);
+      }
+      .big th {
+        background: #eef1f5;
+        font-size: 12px;
+        color: var(--dim);
+        font-weight: 600;
+      }
+      .big tr:last-child td {
+        border-bottom: none;
+      }
+      .row-on {
+        background: #f2f7fd;
+      }
+      .l {
+        text-align: left;
+      }
+      .r {
+        text-align: right;
+      }
+      .strong {
+        font-weight: 600;
+      }
+      .wide {
+        width: 34%;
+      }
+
+      .bar {
+        position: relative;
+        display: block;
+        height: 15px;
+        background: #eef1f5;
+        border-radius: 3px;
+        overflow: hidden;
+        min-width: 70px;
+      }
+      .bar-wide {
+        height: 11px;
+      }
+      .bar-fill {
+        position: absolute;
+        inset: 0 auto 0 0;
+        border-radius: 3px;
+      }
+      .bar-low {
+        background: var(--low);
+      }
+      .bar-mid {
+        background: var(--mid);
+      }
+      .bar-high {
+        background: var(--high);
+      }
+      .bar-count {
+        background: var(--accent);
+        opacity: 0.75;
+      }
+      .bar-text {
+        position: relative;
+        display: block;
+        text-align: right;
+        padding-right: 4px;
+        font-size: 11px;
+        color: #27313c;
+        line-height: 15px;
+      }
+
+      .oplab {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .glyph {
+        vertical-align: middle;
+        flex: none;
+      }
+      .route {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        flex-wrap: wrap;
+      }
+      .step {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        background: #f2f5f8;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        padding: 2px 6px;
+      }
+      .step-t {
+        font-size: 11px;
+        color: var(--dim);
+      }
+      .arrow {
+        color: #9aa7b4;
+      }
+      .dem {
+        width: 86px;
+        text-align: right;
+        padding: 4px 6px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        font: inherit;
+      }
+
+      .insight {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 18px 0;
+        max-width: 830px;
+      }
+      .insight-soft {
+        border-left-color: #9aa7b4;
+      }
+      .insight-ask {
+        border-left-color: var(--off);
+      }
+      .insight h3 {
+        margin: 0 0 8px;
+        font-size: 14px;
+      }
+      .insight p,
+      .insight li {
+        color: var(--dim);
+        margin: 6px 0;
+      }
+      .insight ul {
+        margin: 6px 0;
+        padding-left: 18px;
+      }
+      .note {
+        color: var(--dim);
+        font-size: 12.5px;
+        max-width: 830px;
+        margin: 12px 0 0;
+      }
+      .h3 {
+        font-size: 14px;
+        margin: 22px 0 8px;
+      }
+      .legend {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+      .leg {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--dim);
+        font-size: 12.5px;
+      }
+
+      @media (max-width: 640px) {
+        header,
+        main {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Factory Organization Designer</h1>
+      <p class="sub">
+        The seven-product case from the organization design lecture, with the
+        numbers attached — ISyE 6202 / 6335, version 1
+      </p>
+      <nav id="tabs"></nav>
+    </header>
+    <main id="body"></main>
+    <script>
+/* Factory Organization Designer — the case
+ *
+ * The seven-product case Prof. Montreuil teaches from, read off slide 3 of
+ * "Supply Chain Facility Organization Design Fundamentals" (version 2025/10/14),
+ * itself from Montreuil B. & P. Lefrancois (1996), Organizing Factories as
+ * Responsibility Networks.
+ *
+ * The slides carry the routings and the equipment counts but no demand and no
+ * operation times, so those two are synthetic. They were chosen by reverse
+ * calibration: demand and times were fitted until the function organization
+ * computes exactly the processor counts drawn on slide 19.
+ */
+
+var CASE = {
+  period: {
+    // Slide 64 of the same deck sets a period to a 20-hour workday at 80%
+    // processor efficiency. Reused here so the numbers stay in his convention.
+    hours: 20,
+    efficiency: 0.8,
+    label: "one 20-hour workday",
+  },
+
+  operations: [
+    { id: "O1", name: "blue circle", shape: "circle", fill: "#5b9bd5" },
+    { id: "O2", name: "cyan ellipse", shape: "ellipse", fill: "#4fc3e8" },
+    { id: "O3", name: "red rectangle", shape: "rect", fill: "#e05a5a" },
+    { id: "O4", name: "yellow parallelogram", shape: "para", fill: "#f2ce1b" },
+    { id: "O5", name: "orange rectangle", shape: "rect", fill: "#f2994a" },
+    { id: "O6", name: "green gear", shape: "gear", fill: "#9ccc65" },
+    { id: "O7", name: "purple hexagon", shape: "hex", fill: "#a98bd8" },
+    { id: "O8", name: "orange trapezoid", shape: "trap", fill: "#e8a33d" },
+  ],
+
+  // Demand is held per period from the start, so adding years later changes
+  // the data and not the engine. Version 1 ships a single period.
+  periods: ["Year 1"],
+
+  products: [
+    { id: "P1", demand: [450], route: ["O1", "O2", "O3", "O4", "O5", "O6"] },
+    { id: "P2", demand: [500], route: ["O1", "O2", "O3", "O7", "O8"] },
+    { id: "P3", demand: [400], route: ["O2", "O8", "O1", "O4", "O5", "O6"] },
+    { id: "P4", demand: [350], route: ["O2", "O8", "O1", "O5", "O4", "O6"] },
+    { id: "P5", demand: [300], route: ["O5", "O3", "O2", "O1", "O4", "O6"] },
+    { id: "P6", demand: [550], route: ["O1", "O8", "O4", "O2", "O5"] },
+    { id: "P7", demand: [450], route: ["O1", "O4", "O8", "O2", "O5"] },
+  ],
+
+  // minutes per unit, by operation and product
+  times: {
+    O1: { P1: 1.63, P2: 1.57, P3: 1.32, P4: 1.2, P5: 1.39, P6: 1.31, P7: 1.59 },
+    O2: {
+      P1: 1.53,
+      P2: 1.68,
+      P3: 1.78,
+      P4: 2.08,
+      P5: 1.71,
+      P6: 1.51,
+      P7: 1.94,
+    },
+    O3: { P1: 1.44, P2: 1.17, P5: 1.65 },
+    O4: { P1: 1.13, P3: 1.05, P4: 1.09, P5: 0.8, P6: 1.01, P7: 1.09 },
+    O5: { P1: 1.1, P3: 0.99, P4: 0.79, P5: 0.97, P6: 1.06, P7: 1.22 },
+    O6: { P1: 1.98, P3: 1.56, P4: 1.89, P5: 1.38 },
+    O7: { P2: 1.73 },
+    O8: { P2: 1.58, P3: 1.14, P4: 1.72, P6: 1.45, P7: 1.8 },
+  },
+
+  // What slide 19 draws, per function center. The calibration target.
+  drawn: { O1: 5, O2: 6, O3: 2, O4: 3, O5: 3, O6: 3, O7: 1, O8: 4 },
+
+  // Default groupings, editable in the page.
+  groups: [
+    { id: "G-A", products: ["P1", "P2", "P5"] },
+    { id: "G-B", products: ["P3", "P4"] },
+    { id: "G-C", products: ["P6", "P7"] },
+  ],
+  processCenters: [
+    { id: "p1", ops: ["O1", "O2"] },
+    { id: "p2", ops: ["O3", "O4", "O5"] },
+    { id: "p3", ops: ["O6", "O7", "O8"] },
+  ],
+  fractalCount: 3,
+};
+
+</script>
+    <script>
+/* Factory Organization Designer — the capacity engine
+ *
+ * One rule runs the whole tool:
+ *
+ *     processors in a centre = ceil( work the centre is given / work one processor can do )
+ *     utilization            = work given / (processors * work one processor can do)
+ *
+ * Everything that distinguishes one organization from another is which work
+ * lands in which centre before that ceiling is taken. Splitting the factory
+ * finer means more ceilings, and every ceiling wastes a fraction of a machine.
+ */
+
+var Engine = (function () {
+  function availableMinutes(c) {
+    return c.period.hours * 60 * c.period.efficiency;
+  }
+
+  function demandOf(c, productId, period) {
+    var p = c.products.filter(function (x) {
+      return x.id === productId;
+    })[0];
+    if (!p) return 0;
+    var d = p.demand[period];
+    return typeof d === "number" ? d : 0;
+  }
+
+  function routeOf(c, productId) {
+    var p = c.products.filter(function (x) {
+      return x.id === productId;
+    })[0];
+    return p ? p.route : [];
+  }
+
+  function timeOf(c, op, productId) {
+    var row = c.times[op];
+    if (!row) return 0;
+    var t = row[productId];
+    return typeof t === "number" ? t : 0;
+  }
+
+  /* Minutes of operation `op` demanded by a set of products in a period,
+   * counting a product once per visit (a route may use an operation twice). */
+  function workload(c, op, productIds, period, share) {
+    var f = typeof share === "number" ? share : 1;
+    var total = 0;
+    productIds.forEach(function (pid) {
+      var visits = routeOf(c, pid).filter(function (o) {
+        return o === op;
+      }).length;
+      if (!visits) return;
+      total += demandOf(c, pid, period) * visits * timeOf(c, op, pid) * f;
+    });
+    return total;
+  }
+
+  function ceilAt(x) {
+    // guard float noise so 2.0000000001 does not ask for a third machine
+    return Math.ceil(Number(x.toFixed(9)));
+  }
+
+  /* A station is one pool of interchangeable processors inside a centre.
+   * A dedicated station serves one operation; a flexible station serves
+   * several, which is what lets a composite centre pool its ceilings. */
+  function station(c, label, ops, productIds, period, share) {
+    var minutes = 0;
+    ops.forEach(function (op) {
+      minutes += workload(c, op, productIds, period, share);
+    });
+    var avail = availableMinutes(c);
+    var n = ceilAt(minutes / avail);
+    return {
+      label: label,
+      ops: ops.slice(),
+      minutes: minutes,
+      processors: n,
+      load: minutes / avail,
+      utilization: n ? minutes / (n * avail) : 0,
+    };
+  }
+
+  function centre(c, id, stations) {
+    var kept = stations.filter(function (s) {
+      return s.processors > 0;
+    });
+    return {
+      id: id,
+      stations: kept,
+      processors: kept.reduce(function (a, s) {
+        return a + s.processors;
+      }, 0),
+      minutes: kept.reduce(function (a, s) {
+        return a + s.minutes;
+      }, 0),
+    };
+  }
+
+  function allProducts(c) {
+    return c.products.map(function (p) {
+      return p.id;
+    });
+  }
+  function allOps(c) {
+    return c.operations.map(function (o) {
+      return o.id;
+    });
+  }
+
+  /* ---- the organizations, in the order the lecture introduces them ---- */
+
+  var ORGANIZATIONS = [
+    {
+      id: "product",
+      name: "Product organization",
+      blurb:
+        "One centre per product. Each centre owns every operation its product needs, so every centre rounds up on its own.",
+      build: function (c, period) {
+        return allProducts(c).map(function (pid) {
+          var sts = routeOf(c, pid)
+            .filter(function (op, i, a) {
+              return a.indexOf(op) === i;
+            })
+            .map(function (op) {
+              return station(c, op, [op], [pid], period);
+            });
+          return centre(c, pid, sts);
+        });
+      },
+    },
+    {
+      id: "group",
+      name: "Group organization",
+      blurb:
+        "Products that travel alike are grouped, and each group gets a centre. Fewer ceilings than one centre per product.",
+      build: function (c, period) {
+        return c.groups.map(function (g) {
+          var ops = [];
+          g.products.forEach(function (pid) {
+            routeOf(c, pid).forEach(function (op) {
+              if (ops.indexOf(op) < 0) ops.push(op);
+            });
+          });
+          var sts = ops.map(function (op) {
+            return station(c, op, [op], g.products, period);
+          });
+          return centre(c, g.id, sts);
+        });
+      },
+    },
+    {
+      id: "fractal",
+      name: "Fractal organization",
+      blurb:
+        "f look-alike centres, each making every product at about 1/f of the demand. Scaling means adding another whole centre.",
+      build: function (c, period) {
+        var f = Math.max(1, c.fractalCount | 0);
+        var out = [];
+        for (var i = 0; i < f; i++) {
+          var sts = allOps(c).map(function (op) {
+            return station(c, op, [op], allProducts(c), period, 1 / f);
+          });
+          out.push(centre(c, "f" + (i + 1), sts));
+        }
+        return out;
+      },
+    },
+    {
+      id: "function",
+      name: "Function organization",
+      blurb:
+        "One centre per elementary operation. Every product's demand for that operation is pooled, so this is the fewest machines.",
+      build: function (c, period) {
+        return allOps(c).map(function (op) {
+          return centre(c, "F-" + op, [
+            station(c, op, [op], allProducts(c), period),
+          ]);
+        });
+      },
+    },
+    {
+      id: "process",
+      name: "Process organization",
+      blurb:
+        "Composite centres holding several operations, served by processors flexible across them, so the ceilings pool too.",
+      build: function (c, period) {
+        return c.processCenters.map(function (pc) {
+          return centre(c, pc.id, [
+            station(c, pc.ops.join("+"), pc.ops, allProducts(c), period),
+          ]);
+        });
+      },
+    },
+    {
+      id: "holographic",
+      name: "Holographic organization",
+      blurb:
+        "The function pool broken into single-processor centres scattered through the factory. Same machine count, many more centres.",
+      build: function (c, period) {
+        var out = [];
+        allOps(c).forEach(function (op) {
+          var pooled = station(c, op, [op], allProducts(c), period);
+          var left = pooled.minutes;
+          var avail = availableMinutes(c);
+          for (var i = 0; i < pooled.processors; i++) {
+            var mine = Math.min(left, avail);
+            left -= mine;
+            out.push({
+              id: op + "." + (i + 1),
+              stations: [
+                {
+                  label: op,
+                  ops: [op],
+                  minutes: mine,
+                  processors: 1,
+                  load: mine / avail,
+                  utilization: mine / avail,
+                },
+              ],
+              processors: 1,
+              minutes: mine,
+            });
+          }
+        });
+        return out;
+      },
+    },
+  ];
+
+  function byId(id) {
+    return ORGANIZATIONS.filter(function (o) {
+      return o.id === id;
+    })[0];
+  }
+
+  function evaluate(c, orgId, period) {
+    var org = byId(orgId);
+    var centres = org.build(c, period);
+    var avail = availableMinutes(c);
+    var processors = centres.reduce(function (a, x) {
+      return a + x.processors;
+    }, 0);
+    var minutes = centres.reduce(function (a, x) {
+      return a + x.minutes;
+    }, 0);
+    var perOp = {};
+    centres.forEach(function (ct) {
+      ct.stations.forEach(function (s) {
+        s.ops.forEach(function (op) {
+          perOp[op] = (perOp[op] || 0) + s.processors / s.ops.length;
+        });
+      });
+    });
+    return {
+      org: org,
+      centres: centres,
+      processors: processors,
+      minutes: minutes,
+      centreCount: centres.length,
+      // work the factory cannot avoid, in whole processors
+      theoretical: minutes / avail,
+      // machines bought purely because ceilings do not share
+      rounding: processors - minutes / avail,
+      utilization: processors ? minutes / (processors * avail) : 0,
+      perOp: perOp,
+    };
+  }
+
+  /* Does the function organization reproduce the counts drawn on slide 19? */
+  function calibration(c, period) {
+    var r = evaluate(c, "function", period);
+    var rows = allOps(c).map(function (op) {
+      var ct = r.centres.filter(function (x) {
+        return x.id === "F-" + op;
+      })[0];
+      var got = ct ? ct.processors : 0;
+      return {
+        op: op,
+        drawn: c.drawn[op],
+        computed: got,
+        utilization: ct && ct.stations[0] ? ct.stations[0].utilization : 0,
+        ok: got === c.drawn[op],
+      };
+    });
+    return {
+      rows: rows,
+      ok: rows.every(function (x) {
+        return x.ok;
+      }),
+      drawnTotal: rows.reduce(function (a, x) {
+        return a + x.drawn;
+      }, 0),
+      computedTotal: rows.reduce(function (a, x) {
+        return a + x.computed;
+      }, 0),
+    };
+  }
+
+  return {
+    ORGANIZATIONS: ORGANIZATIONS,
+    availableMinutes: availableMinutes,
+    workload: workload,
+    evaluate: evaluate,
+    calibration: calibration,
+    byId: byId,
+    allProducts: allProducts,
+    allOps: allOps,
+    routeOf: routeOf,
+    timeOf: timeOf,
+    demandOf: demandOf,
+  };
+})();
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = Engine;
+}
+
+</script>
+    <script>
+/* Factory Organization Designer — the page */
+
+(function () {
+  var state = { tab: "capacity", org: "function", period: 0 };
+
+  function $(sel) {
+    return document.querySelector(sel);
+  }
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) {
+      if (k === "class") n.className = attrs[k];
+      else if (k === "text") n.textContent = attrs[k];
+      else if (k.slice(0, 2) === "on") n.addEventListener(k.slice(2), attrs[k]);
+      else n.setAttribute(k, attrs[k]);
+    });
+    (kids || []).forEach(function (c) {
+      if (c) n.appendChild(c);
+    });
+    return n;
+  }
+  function pct(x) {
+    return (x * 100).toFixed(0) + "%";
+  }
+  function num(x, d) {
+    return x.toFixed(d === undefined ? 1 : d);
+  }
+
+  function opInfo(id) {
+    return CASE.operations.filter(function (o) {
+      return o.id === id;
+    })[0];
+  }
+
+  /* a small coloured glyph standing in for the shape he draws on the slides */
+  function glyph(opId, size) {
+    var o = opInfo(opId);
+    var s = size || 14;
+    var ns = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("width", s);
+    svg.setAttribute("height", s);
+    svg.setAttribute("viewBox", "0 0 20 20");
+    svg.setAttribute("class", "glyph");
+    var sh;
+    if (o.shape === "circle") {
+      sh = document.createElementNS(ns, "circle");
+      sh.setAttribute("cx", 10);
+      sh.setAttribute("cy", 10);
+      sh.setAttribute("r", 7);
+    } else if (o.shape === "ellipse") {
+      sh = document.createElementNS(ns, "ellipse");
+      sh.setAttribute("cx", 10);
+      sh.setAttribute("cy", 10);
+      sh.setAttribute("rx", 9);
+      sh.setAttribute("ry", 5.5);
+    } else if (o.shape === "rect") {
+      sh = document.createElementNS(ns, "rect");
+      sh.setAttribute("x", 2);
+      sh.setAttribute("y", 5);
+      sh.setAttribute("width", 16);
+      sh.setAttribute("height", 10);
+      sh.setAttribute("rx", 1.5);
+    } else if (o.shape === "para") {
+      sh = document.createElementNS(ns, "polygon");
+      sh.setAttribute("points", "5,5 19,5 15,15 1,15");
+    } else if (o.shape === "trap") {
+      sh = document.createElementNS(ns, "polygon");
+      sh.setAttribute("points", "3,5 17,5 14,15 6,15");
+    } else if (o.shape === "hex") {
+      sh = document.createElementNS(ns, "polygon");
+      sh.setAttribute("points", "10,2 17,6 17,14 10,18 3,14 3,6");
+    } else {
+      sh = document.createElementNS(ns, "polygon");
+      sh.setAttribute(
+        "points",
+        "7,3 13,3 13,7 17,7 17,13 13,13 13,17 7,17 7,13 3,13 3,7 7,7",
+      );
+    }
+    sh.setAttribute("fill", o.fill);
+    sh.setAttribute("stroke", "rgba(0,0,0,.35)");
+    sh.setAttribute("stroke-width", 1);
+    svg.appendChild(sh);
+    return svg;
+  }
+
+  function opLabel(opId) {
+    return el("span", { class: "oplab" }, [
+      glyph(opId),
+      el("span", { text: opId }),
+    ]);
+  }
+
+  /* ---------------- banner: does it reproduce his slide? ---------------- */
+
+  function calibrationBanner() {
+    var cal = Engine.calibration(CASE, state.period);
+    var box = el("div", {
+      class: "banner " + (cal.ok ? "banner-ok" : "banner-off"),
+    });
+    box.appendChild(
+      el("div", {
+        class: "banner-head",
+        text: cal.ok
+          ? "Function organization reproduces slide 19: " +
+            cal.computedTotal +
+            " processors, every centre matching"
+          : "Function organization no longer matches slide 19 (" +
+            cal.computedTotal +
+            " against " +
+            cal.drawnTotal +
+            " drawn)",
+      }),
+    );
+    var row = el("div", { class: "chips" });
+    cal.rows.forEach(function (r) {
+      row.appendChild(
+        el("span", { class: "chip " + (r.ok ? "chip-ok" : "chip-off") }, [
+          glyph(r.op),
+          el("b", { text: String(r.computed) }),
+          el("span", {
+            class: "chip-sub",
+            text: r.ok ? "drawn " + r.drawn : "drawn " + r.drawn + " ✕",
+          }),
+        ]),
+      );
+    });
+    box.appendChild(row);
+    box.appendChild(
+      el("p", {
+        class: "note",
+        text:
+          "Demand and operation times are synthetic. They were fitted until this row matched the " +
+          "processors Prof. Montreuil draws on slide 19, so every number the tool shows rests on " +
+          "the case as taught. Change a demand or a time and this banner tells you at once whether " +
+          "the case still reconciles.",
+      }),
+    );
+    return box;
+  }
+
+  /* ---------------- tab: capacity ---------------- */
+
+  function utilBar(u) {
+    var cls = u < 0.35 ? "bar-low" : u < 0.7 ? "bar-mid" : "bar-high";
+    return el("span", { class: "bar" }, [
+      el("span", { class: "bar-fill " + cls, style: "width:" + pct(u) }),
+      el("span", { class: "bar-text", text: pct(u) }),
+    ]);
+  }
+
+  function capacityTab() {
+    var wrap = el("div", {});
+    wrap.appendChild(calibrationBanner());
+
+    var picker = el("div", { class: "picker" });
+    Engine.ORGANIZATIONS.forEach(function (o) {
+      picker.appendChild(
+        el("button", {
+          class: "pick " + (state.org === o.id ? "pick-on" : ""),
+          text: o.name.replace(" organization", ""),
+          onclick: function () {
+            state.org = o.id;
+            render();
+          },
+        }),
+      );
+    });
+    wrap.appendChild(picker);
+
+    var r = Engine.evaluate(CASE, state.org, state.period);
+    wrap.appendChild(el("p", { class: "blurb", text: r.org.blurb }));
+
+    var stats = el("div", { class: "stats" });
+    [
+      ["Centres", String(r.centreCount)],
+      ["Processors", String(r.processors)],
+      ["Work to be done", num(r.theoretical, 2) + " processors"],
+      ["Bought for rounding", "+" + num(r.rounding, 2)],
+      ["Average utilization", pct(r.utilization)],
+    ].forEach(function (s) {
+      stats.appendChild(
+        el("div", { class: "stat" }, [
+          el("div", { class: "stat-k", text: s[0] }),
+          el("div", { class: "stat-v", text: s[1] }),
+        ]),
+      );
+    });
+    wrap.appendChild(stats);
+
+    var grid = el("div", { class: "centres" });
+    r.centres.forEach(function (c) {
+      var card = el("div", { class: "centre" });
+      card.appendChild(
+        el("div", { class: "centre-head" }, [
+          el("span", { class: "centre-id", text: c.id }),
+          el("span", {
+            class: "centre-n",
+            text:
+              c.processors + (c.processors === 1 ? " machine" : " machines"),
+          }),
+        ]),
+      );
+      var tb = el("table", { class: "mini" });
+      c.stations.forEach(function (s) {
+        var ops = el("span", { class: "oplab" });
+        s.ops.forEach(function (o) {
+          ops.appendChild(glyph(o));
+        });
+        ops.appendChild(el("span", { text: " " + s.label }));
+        tb.appendChild(
+          el("tr", {}, [
+            el("td", { class: "l" }, [ops]),
+            el("td", { class: "r", text: String(s.processors) }),
+            el("td", { class: "r wide" }, [utilBar(s.utilization)]),
+          ]),
+        );
+      });
+      card.appendChild(tb);
+      grid.appendChild(card);
+    });
+    wrap.appendChild(grid);
+
+    wrap.appendChild(
+      el("p", {
+        class: "note",
+        text:
+          "A bar under about a third is the picture he shows in class: a machine standing idle " +
+          "most of the period because the centre it sits in is too small to keep it busy.",
+      }),
+    );
+    return wrap;
+  }
+
+  /* ---------------- tab: compare ---------------- */
+
+  function compareTab() {
+    var wrap = el("div", {});
+    wrap.appendChild(calibrationBanner());
+
+    var rows = Engine.ORGANIZATIONS.map(function (o) {
+      return Engine.evaluate(CASE, o.id, state.period);
+    });
+    var most = Math.max.apply(
+      null,
+      rows.map(function (r) {
+        return r.processors;
+      }),
+    );
+
+    var t = el("table", { class: "big" });
+    t.appendChild(
+      el("tr", {}, [
+        el("th", { class: "l", text: "Organization" }),
+        el("th", { class: "r", text: "Centres" }),
+        el("th", { class: "r", text: "Machines" }),
+        el("th", { class: "r", text: "Bought for rounding" }),
+        el("th", { class: "r", text: "Average utilization" }),
+        el("th", { class: "l", text: "" }),
+      ]),
+    );
+    rows.forEach(function (r) {
+      var cell = el("td", { class: "l wide" });
+      cell.appendChild(
+        el("span", { class: "bar bar-wide" }, [
+          el("span", {
+            class: "bar-fill bar-count",
+            style: "width:" + pct(r.processors / most),
+          }),
+        ]),
+      );
+      t.appendChild(
+        el(
+          "tr",
+          { class: r.org.id === state.org ? "row-on" : "" },
+          [
+            el("td", { class: "l", text: r.org.name }),
+            el("td", { class: "r", text: String(r.centreCount) }),
+            el("td", { class: "r strong", text: String(r.processors) }),
+            el("td", { class: "r", text: "+" + num(r.rounding, 2) }),
+            el("td", { class: "r", text: pct(r.utilization) }),
+            cell,
+          ].filter(Boolean),
+        ),
+      );
+    });
+    wrap.appendChild(t);
+
+    var f = rows.filter(function (r) {
+      return r.org.id === "function";
+    })[0];
+    var p = rows.filter(function (r) {
+      return r.org.id === "product";
+    })[0];
+    wrap.appendChild(
+      el("div", { class: "insight" }, [
+        el("h3", { text: "What the column is showing" }),
+        el("p", {
+          text:
+            "The work to be done never changes: " +
+            num(f.theoretical, 2) +
+            " processors' worth, whichever way the factory is cut. What changes is how many times " +
+            "that work is divided before each piece is rounded up to a whole machine.",
+        }),
+        el("p", {
+          text:
+            "The function organization pools every product's demand for an operation into one " +
+            "centre and rounds up once per operation: " +
+            f.processors +
+            " machines. The product organization gives each product its own centre and rounds up " +
+            "inside every one of them: " +
+            p.processors +
+            " machines, " +
+            (p.processors - f.processors) +
+            " more for exactly the same output.",
+        }),
+        el("p", {
+          text:
+            "Those extra machines are what a product organization pays for short travel and clear " +
+            "ownership. Version 1 prices only one side of that trade, which is the first thing to " +
+            "extend.",
+        }),
+      ]),
+    );
+    return wrap;
+  }
+
+  /* ---------------- tab: case ---------------- */
+
+  function caseTab() {
+    var wrap = el("div", {});
+    wrap.appendChild(
+      el("div", { class: "insight" }, [
+        el("h3", { text: "Where this case comes from" }),
+        el("p", {
+          text:
+            "The seven products and their routings are read off slide 3 of Supply Chain Facility " +
+            "Organization Design Fundamentals, version 2025/10/14, after Montreuil & Lefrancois " +
+            "(1996). The equipment counts the tool is calibrated against are read off slide 19.",
+        }),
+        el("p", {
+          text:
+            "A period is one " +
+            CASE.period.hours +
+            "-hour workday at " +
+            pct(CASE.period.efficiency) +
+            " processor efficiency, the convention slide 64 uses, so one processor offers " +
+            Engine.availableMinutes(CASE) +
+            " minutes of work per period.",
+        }),
+      ]),
+    );
+
+    var t = el("table", { class: "big" });
+    var head = [
+      el("th", { class: "l", text: "Product" }),
+      el("th", { class: "r", text: "Demand / period" }),
+      el("th", { class: "l", text: "Route, with minutes per unit" }),
+    ];
+    t.appendChild(el("tr", {}, head));
+
+    CASE.products.forEach(function (p) {
+      var route = el("span", { class: "route" });
+      p.route.forEach(function (op, i) {
+        if (i) route.appendChild(el("span", { class: "arrow", text: "→" }));
+        route.appendChild(
+          el("span", { class: "step" }, [
+            glyph(op, 16),
+            el("span", {
+              class: "step-t",
+              text: num(Engine.timeOf(CASE, op, p.id), 2),
+            }),
+          ]),
+        );
+      });
+      var inp = el("input", {
+        class: "dem",
+        type: "number",
+        min: "0",
+        step: "10",
+        value: String(p.demand[state.period]),
+      });
+      inp.addEventListener("change", function () {
+        var v = Number(inp.value);
+        if (isFinite(v) && v >= 0) {
+          p.demand[state.period] = v;
+          render();
+        }
+      });
+      t.appendChild(
+        el("tr", {}, [
+          el("td", { class: "l strong", text: p.id }),
+          el("td", { class: "r" }, [inp]),
+          el("td", { class: "l" }, [route]),
+        ]),
+      );
+    });
+    wrap.appendChild(t);
+
+    wrap.appendChild(
+      el("p", {
+        class: "note",
+        text:
+          "Change a demand and every tab recomputes. The banner at the top of the other tabs turns " +
+          "amber as soon as the function organization stops reproducing slide 19, which is the " +
+          "signal that the case has drifted away from the one he teaches.",
+      }),
+    );
+
+    var legend = el("div", { class: "legend" });
+    CASE.operations.forEach(function (o) {
+      legend.appendChild(
+        el("span", { class: "leg" }, [
+          glyph(o.id, 16),
+          el("span", { text: o.id + " · " + o.name }),
+        ]),
+      );
+    });
+    wrap.appendChild(el("h3", { class: "h3", text: "Operations" }));
+    wrap.appendChild(legend);
+    return wrap;
+  }
+
+  /* ---------------- tab: next ---------------- */
+
+  function nextTab() {
+    var wrap = el("div", {});
+    function block(title, items, tone) {
+      var b = el("div", { class: "insight " + (tone || "") });
+      b.appendChild(el("h3", { text: title }));
+      var ul = el("ul", {});
+      items.forEach(function (i) {
+        ul.appendChild(el("li", { text: i }));
+      });
+      b.appendChild(ul);
+      return b;
+    }
+    wrap.appendChild(
+      block("In this version", [
+        "The seven-product case with its routings, demand and operation times, all editable.",
+        "Required processors and utilization per centre, from demand and times alone.",
+        "Six organizations: product, group, fractal, function, process, holographic.",
+        "A standing check that the function organization still reproduces the counts on slide 19.",
+        "Demand held per period in the data from the start, so years can be added without reworking the engine.",
+      ]),
+    );
+    wrap.appendChild(
+      block(
+        "Not here yet",
+        [
+          "Several periods, and the cost of relayout between them.",
+          "Demand as a distribution, and capacity sized for a stated robustness.",
+          "Queues, waiting time and work in process between machines and between centres.",
+          "Layout: equipment inside a centre, and centres inside the factory.",
+          "Travel, flow and traffic between centres.",
+          "Operators, floor space and cost.",
+        ],
+        "insight-soft",
+      ),
+    );
+    wrap.appendChild(
+      block(
+        "Open questions",
+        [
+          "A composite centre is modelled with processors flexible across its operations, as on slide 67. That makes the process organization need 26 machines, one fewer than the function organization's 27 — so the function organization is the leanest only among dedicated-processor designs.",
+          "Slide 66 prints TOTAL 46 while its own column A2 B1 C4 D7 E4 F1 G1 H9 I13 J1 sums to 43, and the drawing shows 43 processors. The missing three may be the MP/PF blocks.",
+          "On slide 64 of the A-to-J case, operation I is drawn with 13 processors where the stated 86% utilization implies 12.",
+          "Which organizations should the tool carry, and should the group and process centres be fixed or left for the user to form?",
+        ],
+        "insight-ask",
+      ),
+    );
+    return wrap;
+  }
+
+  /* ---------------- shell ---------------- */
+
+  var TABS = [
+    ["capacity", "Capacity", capacityTab],
+    ["compare", "Compare organizations", compareTab],
+    ["case", "The case", caseTab],
+    ["next", "Scope and questions", nextTab],
+  ];
+
+  function render() {
+    var nav = $("#tabs");
+    nav.innerHTML = "";
+    TABS.forEach(function (t) {
+      nav.appendChild(
+        el("button", {
+          class: "tab " + (state.tab === t[0] ? "tab-on" : ""),
+          text: t[1],
+          onclick: function () {
+            state.tab = t[0];
+            render();
+          },
+        }),
+      );
+    });
+    var body = $("#body");
+    body.innerHTML = "";
+    TABS.forEach(function (t) {
+      if (t[0] === state.tab) body.appendChild(t[2]());
+    });
+  }
+
+  window.addEventListener("DOMContentLoaded", render);
+})();
+
+</script>
+  </body>
+</html>
