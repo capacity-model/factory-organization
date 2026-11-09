@@ -34,6 +34,8 @@ ok(
 ok("single file carries the queue model", /erlangC/.test(html));
 ok("single file carries the timeline", /function timeline/.test(html));
 ok("single file carries the flow model", /function flows/.test(html));
+ok("single file carries the layout model", /function layout/.test(html));
+ok("single file carries the footprints", /insideCentre/.test(html));
 
 var dom = new JSDOM(html, {
   runScripts: "dangerously",
@@ -50,7 +52,7 @@ w.document.addEventListener("DOMContentLoaded", function () {
     };
     ok(
       "dist renders the tabs",
-      q("#tabs .tab").length === 6,
+      q("#tabs .tab").length === 7,
       "" + q("#tabs .tab").length,
     );
     ok(

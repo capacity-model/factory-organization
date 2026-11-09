@@ -412,6 +412,143 @@ ok(
   Engine.calibration(CASE).computedTotal === 27,
 );
 
+// 20. two levels of layout, and the travel they imply
+Engine.ORGANIZATIONS.forEach(function (o) {
+  var L = Engine.layout(CASE, o.id, 0, 0);
+  ok(
+    "the building holds its centres in " + o.id,
+    L.usedArea <= L.building.area + 1e-6,
+    L.usedArea + " vs " + L.building.area,
+  );
+  ok(
+    "every centre is inside the building in " + o.id,
+    Object.keys(L.centres).every(function (k) {
+      var c = L.centres[k];
+      return (
+        c.x >= -1e-9 &&
+        c.y >= -1e-9 &&
+        c.x + c.w <= L.building.w + 1e-6 &&
+        c.y + c.h <= L.building.h + 1e-6
+      );
+    }),
+  );
+  ok(
+    "no two centres overlap in " + o.id,
+    (function () {
+      var ids = L.order;
+      for (var i = 0; i < ids.length; i++)
+        for (var j = i + 1; j < ids.length; j++) {
+          var a = L.centres[ids[i]],
+            b = L.centres[ids[j]];
+          var e = 1e-6;
+          if (
+            a.x < b.x + b.w - e &&
+            b.x < a.x + a.w - e &&
+            a.y < b.y + b.h - e &&
+            b.y < a.y + a.h - e
+          )
+            return false;
+        }
+      return true;
+    })(),
+  );
+  ok(
+    "a centre is big enough for its machines in " + o.id,
+    L.order.every(function (id) {
+      var c = L.centres[id];
+      return c.w * c.h >= c.inner.w * c.inner.h - 1e-6;
+    }),
+  );
+  ok(
+    "a machine is drawn for every processor in " + o.id,
+    L.order.reduce(function (a, id) {
+      return a + L.centres[id].inner.machines.length;
+    }, 0) === L.result.processors,
+    L.order.reduce(function (a, id) {
+      return a + L.centres[id].inner.machines.length;
+    }, 0) +
+      " vs " +
+      L.result.processors,
+  );
+  ok("travel is positive in " + o.id, L.travel > 0);
+  ok(
+    "travel between centres never exceeds total travel in " + o.id,
+    L.betweenTravel <= L.travel + 1e-6,
+  );
+  ok(
+    "floor cost follows the area in " + o.id,
+    Math.abs(L.floorCost - L.building.area * CASE.money.floor) < 1e-6,
+  );
+});
+
+var lp = Engine.layout(CASE, "product", 0, 0);
+var lf = Engine.layout(CASE, "function", 0, 0);
+ok(
+  "a product organization carries nothing between centres",
+  lp.betweenTravel === 0,
+);
+ok("but still carries parts in and out", lp.travel > 0);
+ok(
+  "a function organization travels further than a product one",
+  lf.travel > lp.travel,
+  lf.travel + " vs " + lp.travel,
+);
+ok(
+  "a product organization needs more floor than a function one",
+  lp.building.area > lf.building.area,
+  lp.building.area + " vs " + lf.building.area,
+);
+var lh = Engine.layout(CASE, "holographic", 0, 0);
+ok(
+  "scattering the machines travels further still",
+  lh.travel > lf.travel,
+  lh.travel + " vs " + lf.travel,
+);
+
+// a centre's own packing
+var oneCentre = Engine.evaluate(CASE, "function", 0, 0).centres[0];
+var cl = Engine.centreLayout(CASE, oneCentre);
+ok(
+  "the centre packer places every machine",
+  cl.machines.length === oneCentre.processors,
+);
+ok(
+  "machines stay inside the centre",
+  cl.machines.every(function (m) {
+    return (
+      m.x >= -1e-9 &&
+      m.y >= -1e-9 &&
+      m.x + m.w <= cl.w + 1e-6 &&
+      m.y + m.h <= cl.h + 1e-6
+    );
+  }),
+);
+ok(
+  "machines do not overlap",
+  (function () {
+    for (var i = 0; i < cl.machines.length; i++)
+      for (var j = i + 1; j < cl.machines.length; j++) {
+        var a = cl.machines[i],
+          b = cl.machines[j],
+          e = 1e-6;
+        if (
+          a.x < b.x + b.w - e &&
+          b.x < a.x + a.w - e &&
+          a.y < b.y + b.h - e &&
+          b.y < a.y + a.h - e
+        )
+          return false;
+      }
+    return true;
+  })(),
+);
+ok(
+  "every operation has a footprint",
+  CASE.operations.every(function (o) {
+    return o.w > 0 && o.h > 0;
+  }),
+);
+
 console.log(
   (fails ? "FAILED " : "OK ") + (checks - fails) + "/" + checks + " checks",
 );

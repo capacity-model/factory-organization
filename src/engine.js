@@ -619,6 +619,201 @@ var Engine = (function () {
     };
   }
 
+  /* ---------------- two levels of layout ----------------
+   *
+   * The lower level packs an operation's processors inside their centre; the
+   * upper level packs the centres into the building. Both are shelf packing,
+   * which is crude but deterministic and good enough to turn a count of moves
+   * into a distance travelled, and a count of machines into floor area.
+   *
+   * Travel is rectilinear between centre centroids, as a vehicle on aisles
+   * moves, and is what layout adds that a flow count alone cannot show.
+   */
+
+  function opBox(c, op) {
+    var o = c.operations.filter(function (x) {
+      return x.id === op;
+    })[0];
+    var g = 1 + c.space.insideCentre;
+    return o
+      ? { w: o.w * Math.sqrt(g), h: o.h * Math.sqrt(g) }
+      : { w: 3, h: 3 };
+  }
+
+  /* lay rectangles out in shelves inside a box of the given width, returning
+   * the placements and the height used */
+  function shelve(items, width) {
+    var x = 0,
+      y = 0,
+      rowH = 0,
+      out = [];
+    items.forEach(function (it) {
+      if (x > 0 && x + it.w > width) {
+        y += rowH;
+        x = 0;
+        rowH = 0;
+      }
+      out.push({ ref: it.ref, x: x, y: y, w: it.w, h: it.h });
+      x += it.w;
+      if (it.h > rowH) rowH = it.h;
+    });
+    return { placed: out, height: y + rowH };
+  }
+
+  /* the inside of one centre */
+  function centreLayout(c, ct) {
+    var boxes = [];
+    ct.stations.forEach(function (s) {
+      // A station is one pool of interchangeable processors. A flexible one
+      // has to fit the largest operation it may be asked to perform, so its
+      // footprint is the envelope of them all, and there are as many machines
+      // as the station has processors however many operations they cover.
+      var w = 0,
+        h = 0;
+      s.ops.forEach(function (op) {
+        var b = opBox(c, op);
+        if (b.w > w) w = b.w;
+        if (b.h > h) h = b.h;
+      });
+      for (var i = 0; i < s.processors; i++)
+        boxes.push({ ref: s.ops[i % s.ops.length], w: w, h: h });
+    });
+    if (!boxes.length) return { w: 0, h: 0, machines: [] };
+    boxes.sort(function (a, b) {
+      return b.h - a.h || b.w - a.w;
+    });
+    var area = boxes.reduce(function (a, b) {
+      return a + b.w * b.h;
+    }, 0);
+    // try a few widths and keep the tidiest square-ish result
+    var best = null;
+    var widest = Math.max.apply(
+      null,
+      boxes.map(function (b) {
+        return b.w;
+      }),
+    );
+    for (var k = 1; k <= boxes.length; k++) {
+      var width = Math.max(widest, Math.sqrt(area) * (0.6 + 0.12 * k));
+      var r = shelve(boxes, width);
+      var waste = width * r.height - area;
+      var ratio = Math.max(width, r.height) / Math.min(width, r.height);
+      var score = waste + area * (ratio - 1) * 0.25;
+      if (!best || score < best.score)
+        best = { score: score, w: width, h: r.height, machines: r.placed };
+    }
+    return { w: best.w, h: best.h, machines: best.machines };
+  }
+
+  /* the building, and the travel it implies */
+  function layout(c, orgId, period, z) {
+    var r = evaluate(c, orgId, period, z);
+    var pad = c.space.betweenCentres;
+    var inner = r.centres.map(function (ct) {
+      var L = centreLayout(c, ct);
+      var g = Math.sqrt(1 + pad);
+      return {
+        id: ct.id,
+        processors: ct.processors,
+        inner: L,
+        w: L.w * g,
+        h: L.h * g,
+      };
+    });
+    var area = inner.reduce(function (a, x) {
+      return a + x.w * x.h;
+    }, 0);
+    var items = inner
+      .slice()
+      .sort(function (a, b) {
+        return b.h - a.h || b.w - a.w;
+      })
+      .map(function (x) {
+        return { ref: x, w: x.w + c.space.aisle, h: x.h + c.space.aisle };
+      });
+    var widest = Math.max.apply(
+      null,
+      items.map(function (i) {
+        return i.w;
+      }),
+    );
+    var best = null;
+    for (var k = 1; k <= items.length; k++) {
+      var width = Math.max(widest, Math.sqrt(area) * (0.7 + 0.15 * k));
+      var sh = shelve(items, width);
+      var ratio = Math.max(width, sh.height) / Math.min(width, sh.height);
+      var score = width * sh.height + area * (ratio - 1) * 0.3;
+      if (!best || score < best.score)
+        best = { score: score, w: width, h: sh.height, placed: sh.placed };
+    }
+
+    var at = {};
+    best.placed.forEach(function (p) {
+      at[p.ref.id] = {
+        id: p.ref.id,
+        x: p.x,
+        y: p.y,
+        w: p.w - c.space.aisle,
+        h: p.h - c.space.aisle,
+        cx: p.x + (p.w - c.space.aisle) / 2,
+        cy: p.y + (p.h - c.space.aisle) / 2,
+        processors: p.ref.processors,
+        inner: p.ref.inner,
+      };
+    });
+    // docks sit on the left and the right wall
+    at.IN = {
+      id: "IN",
+      x: 0,
+      y: best.h / 2,
+      w: 0,
+      h: 0,
+      cx: 0,
+      cy: best.h / 2,
+    };
+    at.OUT = {
+      id: "OUT",
+      x: best.w,
+      y: best.h / 2,
+      w: 0,
+      h: 0,
+      cx: best.w,
+      cy: best.h / 2,
+    };
+
+    var travel = 0,
+      betweenTravel = 0;
+    r.flows.arcs.forEach(function (a) {
+      var p = at[a.from],
+        q = at[a.to];
+      if (!p || !q) return;
+      var d = Math.abs(p.cx - q.cx) + Math.abs(p.cy - q.cy);
+      travel += a.units * d;
+      if (a.from !== "IN" && a.to !== "OUT") betweenTravel += a.units * d;
+    });
+
+    return {
+      result: r,
+      building: { w: best.w, h: best.h, area: best.w * best.h },
+      centres: at,
+      order: best.placed.map(function (p) {
+        return p.ref.id;
+      }),
+      usedArea: area,
+      travel: travel,
+      betweenTravel: betweenTravel,
+      perMove: r.flows.arcs.reduce(function (a, x) {
+        return a + x.units;
+      }, 0)
+        ? travel /
+          r.flows.arcs.reduce(function (a, x) {
+            return a + x.units;
+          }, 0)
+        : 0,
+      floorCost: best.w * best.h * c.money.floor,
+    };
+  }
+
   /* ---------------- the standing reconciliation ---------------- */
 
   function calibration(c) {
@@ -657,6 +852,8 @@ var Engine = (function () {
     workStats: workStats,
     erlangC: erlangC,
     evaluate: evaluate,
+    layout: layout,
+    centreLayout: centreLayout,
     timeline: timeline,
     flows: flows,
     streams: streams,

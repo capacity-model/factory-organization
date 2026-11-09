@@ -20,15 +20,77 @@ var CASE = {
     label: "one 20-hour workday",
   },
 
+  // A processor's footprint in metres, the floor it needs to itself including
+  // the operator's place and the room to load and unload it. The slides draw
+  // the machines at different sizes but give no dimensions, so these are
+  // synthetic like the demand and the times, and unlike those two they have no
+  // count on a slide to be calibrated against. They are the one input here
+  // that is a plain assumption.
   operations: [
-    { id: "O1", name: "blue circle", shape: "circle", fill: "#5b9bd5" },
-    { id: "O2", name: "cyan ellipse", shape: "ellipse", fill: "#4fc3e8" },
-    { id: "O3", name: "red rectangle", shape: "rect", fill: "#e05a5a" },
-    { id: "O4", name: "yellow parallelogram", shape: "para", fill: "#f2ce1b" },
-    { id: "O5", name: "orange rectangle", shape: "rect", fill: "#f2994a" },
-    { id: "O6", name: "green gear", shape: "gear", fill: "#9ccc65" },
-    { id: "O7", name: "purple hexagon", shape: "hex", fill: "#a98bd8" },
-    { id: "O8", name: "orange trapezoid", shape: "trap", fill: "#e8a33d" },
+    {
+      id: "O1",
+      name: "blue circle",
+      shape: "circle",
+      fill: "#5b9bd5",
+      w: 3,
+      h: 3,
+    },
+    {
+      id: "O2",
+      name: "cyan ellipse",
+      shape: "ellipse",
+      fill: "#4fc3e8",
+      w: 4,
+      h: 2.5,
+    },
+    {
+      id: "O3",
+      name: "red rectangle",
+      shape: "rect",
+      fill: "#e05a5a",
+      w: 5,
+      h: 3,
+    },
+    {
+      id: "O4",
+      name: "yellow parallelogram",
+      shape: "para",
+      fill: "#f2ce1b",
+      w: 3,
+      h: 2,
+    },
+    {
+      id: "O5",
+      name: "orange rectangle",
+      shape: "rect",
+      fill: "#f2994a",
+      w: 4,
+      h: 3,
+    },
+    {
+      id: "O6",
+      name: "green gear",
+      shape: "gear",
+      fill: "#9ccc65",
+      w: 2.5,
+      h: 2.5,
+    },
+    {
+      id: "O7",
+      name: "purple hexagon",
+      shape: "hex",
+      fill: "#a98bd8",
+      w: 6,
+      h: 4,
+    },
+    {
+      id: "O8",
+      name: "orange trapezoid",
+      shape: "trap",
+      fill: "#e8a33d",
+      w: 3.5,
+      h: 3,
+    },
   ],
 
   // Demand is held per period. Year 1 carries the calibrated demand, so the
@@ -127,7 +189,17 @@ var CASE = {
   money: {
     install: 250000, // a new processor, delivered and installed
     relocate: 25000, // moving an existing processor to another centre
+    floor: 2700, // one square metre of factory floor, built
     currency: "$",
+  },
+
+  // Room left around the machines: inside a centre for the operator and the
+  // parts waiting at the machine, and between centres for the aisles that
+  // carry work from one to the next.
+  space: {
+    insideCentre: 0.45, // of the machine footprint, added as working room
+    betweenCentres: 0.3, // of the centre area, added as aisle
+    aisle: 3, // metres of gangway drawn between rows of centres
   },
 
   // Service levels offered for capacity robustness, as he asked: size capacity

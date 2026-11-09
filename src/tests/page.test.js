@@ -67,8 +67,8 @@ function machines() {
 
 /* ---- the shell ---- */
 ok(
-  "six tabs rendered",
-  all("#tabs .tab").length === 6,
+  "seven tabs rendered",
+  all("#tabs .tab").length === 7,
   "" + all("#tabs .tab").length,
 );
 ok("capacity is the tab open", $("#tabs .tab-on").textContent === "Capacity");
@@ -261,6 +261,40 @@ ok(
   /Layout: equipment inside a centre/.test(text()),
 );
 ok("scope mentions the queue model", /Erlang C/.test(text()));
+
+/* ---- layout ---- */
+tab("Layout");
+ok("a plan is drawn", !!$("svg.plan"));
+ok(
+  "the building outline plus a block per centre",
+  $("svg.plan").querySelectorAll("rect").length >= 1 + 8,
+  "" + $("svg.plan").querySelectorAll("rect").length,
+);
+ok(
+  "IN and OUT docks drawn",
+  $("svg.plan").querySelectorAll("circle").length === 2,
+  "" + $("svg.plan").querySelectorAll("circle").length,
+);
+ok("floor area is reported", /Building/.test(text()));
+ok("travel is reported", /Travel per period/.test(text()));
+ok("the two levels are explained", /The two levels/.test(text()));
+ok(
+  "footprints are flagged as an assumption",
+  /Machine footprints are an assumption/.test(text()),
+);
+pick("Product");
+ok("a product organization still draws a plan", !!$("svg.plan"));
+ok(
+  "and reports no travel between centres",
+  /Of that between centres/.test(text()),
+);
+pick("Function");
+
+/* travel reaches the comparison */
+tab("Compare");
+ok("compare carries travel", /Travel/.test(text()));
+ok("compare carries floor", /Floor/.test(text()));
+ok("compare closes the account", /the account closes/.test(text()));
 
 console.log(
   (fails ? "FAILED " : "OK ") + (checks - fails) + "/" + checks + " checks",

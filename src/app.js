@@ -604,6 +604,186 @@
     return wrap;
   }
 
+  /* ---------------- tab: layout ---------------- */
+
+  function layoutTab() {
+    var wrap = el("div", {});
+    wrap.appendChild(controls({}));
+
+    var picker = el("div", { class: "picker" });
+    Engine.ORGANIZATIONS.forEach(function (o) {
+      picker.appendChild(
+        el("button", {
+          class: "pick " + (state.org === o.id ? "pick-on" : ""),
+          text: o.name.replace(" organization", ""),
+          onclick: function () {
+            state.org = o.id;
+            render();
+          },
+        }),
+      );
+    });
+    wrap.appendChild(picker);
+
+    var L = Engine.layout(CASE, state.org, state.period, z());
+    var stats = el("div", { class: "stats" });
+    [
+      ["Building", Math.round(L.building.area) + " m\u00b2"],
+      [
+        "Shape",
+        Math.round(L.building.w) + " \u00d7 " + Math.round(L.building.h) + " m",
+      ],
+      ["Taken by centres", pct(L.usedArea / L.building.area)],
+      ["Floor cost", money(L.floorCost)],
+      ["Travel per period", qty(L.travel) + " m"],
+      ["Of that between centres", qty(L.betweenTravel) + " m"],
+      ["Average move", num(L.perMove, 1) + " m"],
+    ].forEach(function (s) {
+      stats.appendChild(
+        el("div", { class: "stat" }, [
+          el("div", { class: "stat-k", text: s[0] }),
+          el("div", { class: "stat-v", text: s[1] }),
+        ]),
+      );
+    });
+    wrap.appendChild(stats);
+    wrap.appendChild(plan(L));
+
+    wrap.appendChild(
+      el("div", { class: "insight" }, [
+        el("h3", { text: "The two levels" }),
+        el("p", {
+          text:
+            "The lower level packs an operation's processors inside their centre; the upper level packs " +
+            "the centres into the building, with a gangway between rows. Both are shelf packing, which " +
+            "is crude but deterministic — good enough to turn a count of moves into a distance travelled " +
+            "and a count of machines into floor area, and not good enough to be called a layout design.",
+        }),
+        el("p", {
+          text:
+            "Travel is rectilinear between centre centroids, the way a vehicle on aisles moves. It is " +
+            "what layout adds that a flow count alone cannot show: a function organization makes the " +
+            "most moves and so pays the most travel, while a product organization finishes each part " +
+            "where it starts and only carries it in and out.",
+        }),
+        el("p", {
+          class: "dim",
+          text:
+            "Machine footprints are an assumption. The slides draw the machines at different sizes but " +
+            "give no dimensions, and unlike the demand and the times there is no count on a slide to " +
+            "calibrate them against.",
+        }),
+      ]),
+    );
+    return wrap;
+  }
+
+  function plan(L) {
+    var box = el("div", { class: "diagram" });
+    var W = L.building.w,
+      H = L.building.h;
+    var m = 14;
+    var s = svg("svg", {
+      viewBox: -m + " " + -m + " " + (W + 2 * m) + " " + (H + 2 * m),
+      width: "100%",
+      class: "plan",
+      preserveAspectRatio: "xMidYMid meet",
+    });
+    s.appendChild(
+      svg("rect", {
+        x: 0,
+        y: 0,
+        width: num(W, 1),
+        height: num(H, 1),
+        fill: "#fbfcfd",
+        stroke: "#1d2733",
+        "stroke-width": 1.2,
+      }),
+    );
+
+    L.order.forEach(function (id) {
+      var c = L.centres[id];
+      if (!c) return;
+      var g = svg("g", {});
+      g.appendChild(
+        svg("rect", {
+          x: num(c.x, 1),
+          y: num(c.y, 1),
+          width: num(c.w, 1),
+          height: num(c.h, 1),
+          fill: "#ffffff",
+          stroke: "#1f5fa8",
+          "stroke-width": 0.7,
+          rx: 0.6,
+        }),
+      );
+      (c.inner.machines || []).forEach(function (mch) {
+        var o = opInfo(mch.ref);
+        g.appendChild(
+          svg("rect", {
+            x: num(c.x + mch.x * (c.w / Math.max(1, c.inner.w)), 2),
+            y: num(c.y + mch.y * (c.h / Math.max(1, c.inner.h)), 2),
+            width: num(mch.w * (c.w / Math.max(1, c.inner.w)) * 0.86, 2),
+            height: num(mch.h * (c.h / Math.max(1, c.inner.h)) * 0.86, 2),
+            fill: o ? o.fill : "#9aa7b4",
+            "fill-opacity": 0.8,
+            stroke: "rgba(0,0,0,.3)",
+            "stroke-width": 0.25,
+            rx: 0.3,
+          }),
+        );
+      });
+      var t = svg("text", {
+        x: num(c.x + c.w / 2, 1),
+        y: num(c.y - 1.2, 1),
+        "text-anchor": "middle",
+        "font-size": 2.6,
+        fill: "#5d6a79",
+      });
+      t.textContent = id.replace("F-", "") + " \u00b7 " + c.processors;
+      g.appendChild(t);
+      box.appendChild(document.createTextNode(""));
+      s.appendChild(g);
+    });
+
+    [
+      ["IN", 0, H / 2],
+      ["OUT", W, H / 2],
+    ].forEach(function (d) {
+      s.appendChild(
+        svg("circle", {
+          cx: num(d[1], 1),
+          cy: num(d[2], 1),
+          r: 2.2,
+          fill: "#eef1f5",
+          stroke: "#9aa7b4",
+          "stroke-width": 0.6,
+        }),
+      );
+      var t = svg("text", {
+        x: num(d[1], 1),
+        y: num(d[2] + 5.5, 1),
+        "text-anchor": "middle",
+        "font-size": 2.6,
+        fill: "#5d6a79",
+      });
+      t.textContent = d[0];
+      s.appendChild(t);
+    });
+
+    box.appendChild(s);
+    box.appendChild(
+      el("p", {
+        class: "note",
+        text:
+          "Each outlined block is a centre, labelled with its machine count; the coloured rectangles " +
+          "inside it are the processors, drawn in the colour of their operation. IN and OUT are the " +
+          "docks on the two walls.",
+      }),
+    );
+    return box;
+  }
+
   /* ---------------- tab: compare ---------------- */
 
   function compareTab() {
@@ -613,6 +793,10 @@
 
     var rows = Engine.ORGANIZATIONS.map(function (o) {
       return Engine.evaluate(CASE, o.id, state.period, z());
+    });
+    var lay = {};
+    Engine.ORGANIZATIONS.forEach(function (o) {
+      lay[o.id] = Engine.layout(CASE, o.id, state.period, z());
     });
     var most = Math.max.apply(
       null,
@@ -631,6 +815,8 @@
         el("th", { class: "r", text: "Utilization" }),
         el("th", { class: "r", text: "Wait per visit" }),
         el("th", { class: "r", text: "Moves between centres" }),
+        el("th", { class: "r", text: "Travel" }),
+        el("th", { class: "r", text: "Floor" }),
         el("th", { class: "l", text: "" }),
       ]),
     );
@@ -652,6 +838,11 @@
           el("td", { class: "r", text: pct(r.utilization) }),
           el("td", { class: "r", text: mins(r.avgWait) }),
           el("td", { class: "r", text: qty(r.flows.moves) }),
+          el("td", { class: "r", text: qty(lay[r.org.id].travel) + " m" }),
+          el("td", {
+            class: "r",
+            text: qty(lay[r.org.id].building.area) + " m\u00b2",
+          }),
           cell,
         ]),
       );
@@ -702,6 +893,19 @@
             ". Breaking one pool of machines into separate single-machine centres costs nothing in " +
             "capital and a great deal in queueing, and that is what it pays for the freedom to place " +
             "them anywhere.",
+        }),
+        el("p", {
+          text:
+            "Laid out, the account closes. The product organization carries parts " +
+            qty(lay.product.travel) +
+            " metres a period and the function organization " +
+            qty(lay["function"].travel) +
+            " — the machines a product organization buys are what it spends to avoid that travel, and " +
+            "the floor it needs for them, " +
+            qty(lay.product.building.area) +
+            " m\u00b2 against " +
+            qty(lay["function"].building.area) +
+            " m\u00b2, is part of the bill.",
         }),
       ]),
     );
@@ -933,6 +1137,7 @@
   var TABS = [
     ["capacity", "Capacity", capacityTab],
     ["network", "Network", networkTab],
+    ["layout", "Layout", layoutTab],
     ["years", "Over the years", yearsTab],
     ["compare", "Compare", compareTab],
     ["case", "The case", caseTab],

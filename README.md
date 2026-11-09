@@ -64,16 +64,16 @@ turns amber the moment the function organization stops reproducing slide 19.
 
 Year 1, capacity sized on the mean:
 
-| Organization | Centres | Machines | For rounding | Utilization | Wait per visit | Moves between centres |
-| ------------ | ------: | -------: | -----------: | ----------: | -------------: | --------------------: |
-| Product      |       7 |       39 |       +14.70 |         62% |        5.0 min |                     0 |
-| Group        |       3 |       33 |        +8.70 |         74% |        7.6 min |                     0 |
-| Fractal, f=3 |       3 |       33 |        +8.70 |         74% |        6.2 min |                     0 |
-| Function     |       8 |       27 |        +2.70 |         90% |        3.4 min |                13,500 |
-| Process      |       3 |       26 |        +1.70 |         93% |        6.3 min |                 9,800 |
-| Holographic  |      27 |       27 |        +2.70 |         90% |       12.7 min |                13,500 |
+| Organization | Centres | Machines | For rounding | Utilization | Wait per visit | Moves between centres |    Travel |    Floor |
+| ------------ | ------: | -------: | -----------: | ----------: | -------------: | --------------------: | --------: | -------: |
+| Product      |       7 |       39 |       +14.70 |         62% |        5.0 min |                     0 | 195,412 m | 2,064 m² |
+| Group        |       3 |       33 |        +8.70 |         74% |        7.6 min |                     0 | 151,485 m | 1,411 m² |
+| Fractal, f=3 |       3 |       33 |        +8.70 |         74% |        6.2 min |                     0 | 157,734 m | 1,494 m² |
+| Function     |       8 |       27 |        +2.70 |         90% |        3.4 min |                13,500 | 498,812 m | 1,386 m² |
+| Process      |       3 |       26 |        +1.70 |         93% |        6.3 min |                 9,800 | 409,630 m | 1,675 m² |
+| Holographic  |      27 |       27 |        +2.70 |         90% |       12.7 min |                13,500 | 551,997 m | 1,698 m² |
 
-The work to be done is 24.30 processors' worth in every one of them. Three
+The work to be done is 24.30 processors' worth in every one of them. Four
 things are being traded, and each organization pays in a different currency:
 
 - **Machines.** The product organization buys 39 to do 24.30 machines' worth of
@@ -87,6 +87,13 @@ things are being traded, and each organization pays in a different currency:
   capital and a great deal in queueing — five servers at 90% make a far shorter
   queue than five single servers at 90% — and that is what buys the freedom to
   place them anywhere.
+- **Floor.** The product organization needs 2,064 m² against the function
+  organization's 1,386. The machines it buys have to stand somewhere.
+
+Laid out, the account closes: the product organization carries parts 195,412
+metres a period where the function organization carries them 498,812. The twelve
+extra machines and the 678 m² of extra floor are what a product organization
+spends to avoid that travel.
 
 ### What robustness costs
 
@@ -133,10 +140,22 @@ capacity arrives one whole centre at a time.
 The install and relocation prices are placeholders — the lecture case carries
 none. What matters to the comparison is the ratio.
 
+### Two levels of layout
+
+The lower level packs an operation's processors inside their centre; the upper
+level packs the centres into the building, with a gangway between rows. Both are
+shelf packing: crude but deterministic, good enough to turn a count of moves into
+a distance travelled and a count of machines into floor area, and not good enough
+to be called a layout design. Travel is rectilinear between centre centroids, the
+way a vehicle on aisles moves.
+
+Machine footprints are an assumption. The slides draw the machines at different
+sizes but give no dimensions, and unlike the demand and the times there is no
+count on a slide to calibrate them against. They are the one input here that
+rests on nothing but judgement.
+
 ## Not modelled yet
 
-- Layout: equipment inside a centre, and centres inside the factory.
-- Travel distance and traffic, as against the number of moves.
 - Work in process held between machines and between centres.
 - Operators, floor space, and operating cost as against capital.
 - Setup times, which the lecture sets aside for now.
@@ -183,9 +202,11 @@ cd src && node build_standalone.js
 cd src && ./tests/run.sh
 ```
 
-306 checks across three suites: the engine, the calibration, the robustness
-model, Erlang C, the flow model and the yearly timeline; the page under `jsdom`,
-driven through every tab and control; and the built single file.
+381 checks across three suites: the engine, the calibration, the robustness
+model, Erlang C, the flow model, the two layout packers and the yearly timeline;
+the page under `jsdom`, driven through every tab and control; and the built
+single file. The layout checks assert that no two centres overlap, that every
+centre is inside the building, and that a machine is drawn for every processor.
 
 ## Contact Us
 
