@@ -31,18 +31,57 @@ var CASE = {
     { id: "O8", name: "orange trapezoid", shape: "trap", fill: "#e8a33d" },
   ],
 
-  // Demand is held per period from the start, so adding years later changes
-  // the data and not the engine. Version 1 ships a single period.
-  periods: ["Year 1"],
+  // Demand is held per period. Year 1 carries the calibrated demand, so the
+  // reconciliation against slide 19 is always read on Year 1.
+  periods: ["Year 1", "Year 2", "Year 3", "Year 4"],
 
+  // demand per period, and the coefficient of variation of that demand.
+  // Year 1 is the calibrated column; later years grow and shrink unevenly, and
+  // P5 is withdrawn after Year 3, so an organization good in Year 1 is not
+  // automatically good in Year 4.
   products: [
-    { id: "P1", demand: [450], route: ["O1", "O2", "O3", "O4", "O5", "O6"] },
-    { id: "P2", demand: [500], route: ["O1", "O2", "O3", "O7", "O8"] },
-    { id: "P3", demand: [400], route: ["O2", "O8", "O1", "O4", "O5", "O6"] },
-    { id: "P4", demand: [350], route: ["O2", "O8", "O1", "O5", "O4", "O6"] },
-    { id: "P5", demand: [300], route: ["O5", "O3", "O2", "O1", "O4", "O6"] },
-    { id: "P6", demand: [550], route: ["O1", "O8", "O4", "O2", "O5"] },
-    { id: "P7", demand: [450], route: ["O1", "O4", "O8", "O2", "O5"] },
+    {
+      id: "P1",
+      demand: [450, 520, 600, 690],
+      cv: 0.15,
+      route: ["O1", "O2", "O3", "O4", "O5", "O6"],
+    },
+    {
+      id: "P2",
+      demand: [500, 420, 300, 180],
+      cv: 0.2,
+      route: ["O1", "O2", "O3", "O7", "O8"],
+    },
+    {
+      id: "P3",
+      demand: [400, 430, 450, 470],
+      cv: 0.18,
+      route: ["O2", "O8", "O1", "O4", "O5", "O6"],
+    },
+    {
+      id: "P4",
+      demand: [350, 470, 640, 860],
+      cv: 0.25,
+      route: ["O2", "O8", "O1", "O5", "O4", "O6"],
+    },
+    {
+      id: "P5",
+      demand: [300, 240, 170, 0],
+      cv: 0.12,
+      route: ["O5", "O3", "O2", "O1", "O4", "O6"],
+    },
+    {
+      id: "P6",
+      demand: [550, 620, 700, 790],
+      cv: 0.2,
+      route: ["O1", "O8", "O4", "O2", "O5"],
+    },
+    {
+      id: "P7",
+      demand: [450, 460, 470, 480],
+      cv: 0.15,
+      route: ["O1", "O4", "O8", "O2", "O5"],
+    },
   ],
 
   // minutes per unit, by operation and product
@@ -80,4 +119,23 @@ var CASE = {
     { id: "p3", ops: ["O6", "O7", "O8"] },
   ],
   fractalCount: 3,
+
+  // The lecture case carries no prices. These are placeholders so the cost of
+  // changing a factory year on year has a shape; they are meant to be replaced
+  // with real figures. What matters is the ratio: moving a machine is cheaper
+  // than buying one, and that is what makes an inflexible organization expensive.
+  money: {
+    install: 250000, // a new processor, delivered and installed
+    relocate: 25000, // moving an existing processor to another centre
+    currency: "$",
+  },
+
+  // Service levels offered for capacity robustness, as he asked: size capacity
+  // so demand is met with a stated probability rather than on the average.
+  serviceLevels: [
+    { label: "mean", p: 0.5, z: 0 },
+    { label: "90%", p: 0.9, z: 1.2816 },
+    { label: "95%", p: 0.95, z: 1.6449 },
+    { label: "99%", p: 0.99, z: 2.3263 },
+  ],
 };

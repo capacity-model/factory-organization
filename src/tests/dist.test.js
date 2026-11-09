@@ -31,6 +31,9 @@ ok(
   "single file carries the page code",
   /Factory Organization Designer — the page/.test(html),
 );
+ok("single file carries the queue model", /erlangC/.test(html));
+ok("single file carries the timeline", /function timeline/.test(html));
+ok("single file carries the flow model", /function flows/.test(html));
 
 var dom = new JSDOM(html, {
   runScripts: "dangerously",
@@ -47,8 +50,26 @@ w.document.addEventListener("DOMContentLoaded", function () {
     };
     ok(
       "dist renders the tabs",
-      q("#tabs .tab").length === 4,
+      q("#tabs .tab").length === 6,
       "" + q("#tabs .tab").length,
+    );
+    ok(
+      "dist carries the year and service-level controls",
+      q(".mini-pick").length === 8,
+      "" + q(".mini-pick").length,
+    );
+    ok("dist reports a queue per station", q(".queue").length >= 8);
+    ok(
+      "dist draws the network tab button",
+      Array.prototype.slice.call(q("#tabs .tab")).some(function (b) {
+        return /Network/.test(b.textContent);
+      }),
+    );
+    ok(
+      "dist draws the years tab button",
+      Array.prototype.slice.call(q("#tabs .tab")).some(function (b) {
+        return /Over the years/.test(b.textContent);
+      }),
     );
     ok(
       "dist renders the green banner",

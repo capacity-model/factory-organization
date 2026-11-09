@@ -42,23 +42,39 @@ function all(s) {
 function text() {
   return w.document.body.textContent;
 }
-function click(node) {
-  node.dispatchEvent(new w.Event("click", { bubbles: true }));
+function click(n) {
+  n.dispatchEvent(new w.Event("click", { bubbles: true }));
+}
+function tab(name) {
+  var t = all("#tabs .tab").filter(function (x) {
+    return new RegExp(name).test(x.textContent);
+  })[0];
+  ok("tab exists: " + name, !!t);
+  if (t) click(t);
+}
+function pick(name) {
+  var p = all(".pick").filter(function (x) {
+    return x.textContent === name;
+  })[0];
+  ok("organization button exists: " + name, !!p);
+  if (p) click(p);
+}
+function machines() {
+  return all(".centre-n").reduce(function (a, n) {
+    return a + parseInt(n.textContent, 10);
+  }, 0);
 }
 
-// the shell came up
+/* ---- the shell ---- */
 ok(
-  "four tabs rendered",
-  all("#tabs .tab").length === 4,
+  "six tabs rendered",
+  all("#tabs .tab").length === 6,
   "" + all("#tabs .tab").length,
 );
-ok(
-  "capacity tab is the one open",
-  $("#tabs .tab-on").textContent === "Capacity",
-);
+ok("capacity is the tab open", $("#tabs .tab-on").textContent === "Capacity");
 ok("body is not empty", $("#body").children.length > 0);
 
-// the calibration banner is green and names the right total
+/* ---- the standing reconciliation ---- */
 ok("banner is green", !!$(".banner-ok"));
 ok("banner reports 27", /27 processors/.test(text()));
 ok(
@@ -66,68 +82,115 @@ ok(
   all(".chip").length === 8,
   "" + all(".chip").length,
 );
-ok("every chip is ok", all(".chip-off").length === 0);
+ok("every chip matches", all(".chip-off").length === 0);
 
-// the capacity tab shows the function organization by default
+/* ---- capacity, at Year 1 on the mean ---- */
 ok(
-  "function is the selected organization",
+  "function is the organization shown",
   $(".pick-on").textContent === "Function",
 );
 ok(
-  "eight function centres drawn",
+  "eight function centres",
   all(".centre").length === 8,
   "" + all(".centre").length,
 );
-var machines = all(".centre-n").map(function (n) {
-  return parseInt(n.textContent, 10);
-});
-ok(
-  "centres sum to 27",
-  machines.reduce(function (a, b) {
-    return a + b;
-  }, 0) === 27,
-  JSON.stringify(machines),
-);
+ok("they sum to 27 machines", machines() === 27, "" + machines());
 ok("utilization bars drawn", all(".bar-fill").length >= 8);
+ok("a queue is reported per station", all(".queue").length >= 8);
+ok("the average wait is a headline", /Average wait per visit/.test(text()));
+ok("moves between centres is a headline", /Moves between centres/.test(text()));
 
-// switching organization changes the picture
-var picks = all(".pick");
-var product = picks.filter(function (p) {
-  return p.textContent === "Product";
-})[0];
-ok("a Product button exists", !!product);
-click(product);
+/* ---- the year and service-level controls ---- */
+ok(
+  "four years and four service levels",
+  all(".mini-pick").length === 8,
+  "" + all(".mini-pick").length,
+);
+ok(
+  "Year 1 is selected",
+  all(".mini-pick")[0].className.indexOf("mini-on") >= 0,
+);
+ok(
+  "the mean is selected",
+  all(".mini-pick")[4].className.indexOf("mini-on") >= 0,
+);
+
+click(all(".mini-pick")[6]); // 95%
+var at95 = machines();
+ok("95% robustness buys machines", at95 > 27, at95 + " vs 27");
+ok(
+  "the banner stays green at 95%",
+  !!$(".banner-ok"),
+  "the reconciliation is read on Year 1 at the mean, not on the chosen level",
+);
+click(all(".mini-pick")[4]); // mean
+ok("back to 27 at the mean", machines() === 27, "" + machines());
+
+click(all(".mini-pick")[3]); // Year 4
+ok("Year 4 differs from Year 1", machines() !== 27, "" + machines());
+ok("the banner is still green in Year 4", !!$(".banner-ok"));
+click(all(".mini-pick")[0]); // Year 1
+ok("back to 27 in Year 1", machines() === 27, "" + machines());
+
+/* ---- switching organization ---- */
+pick("Product");
 ok("product organization selected", $(".pick-on").textContent === "Product");
 ok(
   "seven product centres",
   all(".centre").length === 7,
   "" + all(".centre").length,
 );
-var m2 = all(".centre-n").map(function (n) {
-  return parseInt(n.textContent, 10);
-});
+ok("product centres sum to 39", machines() === 39, "" + machines());
+ok("a product organization shows an idle machine", all(".bar-low").length > 0);
+pick("Holographic");
 ok(
-  "product centres sum to 39",
-  m2.reduce(function (a, b) {
-    return a + b;
-  }, 0) === 39,
-  JSON.stringify(m2),
+  "holographic draws 27 centres",
+  all(".centre").length === 27,
+  "" + all(".centre").length,
 );
-ok(
-  "product organization shows an idle machine",
-  all(".bar-low").length > 0,
-  "no bar under a third",
-);
+ok("each holding one machine", machines() === 27, "" + machines());
+pick("Function");
 
-// the compare tab lists every organization with its machine count
-var tabs = all("#tabs .tab");
-click(
-  tabs.filter(function (t) {
-    return /Compare/.test(t.textContent);
-  })[0],
+/* ---- network ---- */
+tab("Network");
+ok("the diagram is drawn", !!$("svg.net"));
+ok(
+  "a node per centre plus IN and OUT",
+  $("svg.net").querySelectorAll("circle").length === 8 + 2,
+  "" + $("svg.net").querySelectorAll("circle").length,
+);
+ok("arcs drawn", $("svg.net").querySelectorAll("path").length > 8);
+ok("arcs carry a tooltip", !!$("svg.net title"));
+ok("the heaviest arcs are tabulated", /Heaviest arcs/.test(text()));
+pick("Product");
+ok(
+  "a product organization reports no arcs between centres",
+  /No arcs between centres/.test(text()),
 );
 ok(
-  "compare table has a row per organization",
+  "and still draws its centres",
+  $("svg.net").querySelectorAll("circle").length === 7 + 2,
+  "" + $("svg.net").querySelectorAll("circle").length,
+);
+pick("Function");
+
+/* ---- over the years ---- */
+tab("Over the years");
+ok("a row per organization and a header", all(".big tr").length >= 7);
+ok(
+  "exactly one best row is marked",
+  all(".row-best").length === 1,
+  "" + all(".row-best").length,
+);
+ok("a year-on-year breakdown", /Moved, not bought/.test(text()));
+ok("money is shown", /\$/.test(text()));
+ok("the composition point is made", /change in its composition/.test(text()));
+ok("the prices are flagged as placeholders", /placeholders/.test(text()));
+
+/* ---- compare ---- */
+tab("Compare");
+ok(
+  "compare has a row per organization",
   all(".big tr").length === 7,
   "" + all(".big tr").length,
 );
@@ -137,16 +200,16 @@ ok(
   "compare explains the invariant",
   /work to be done never changes/i.test(text()),
 );
-
-// the case tab is editable and drives the rest
-click(
-  all("#tabs .tab").filter(function (t) {
-    return /The case/.test(t.textContent);
-  })[0],
-);
 ok(
-  "seven demand inputs",
-  all("input.dem").length === 7,
+  "compare makes the holographic point",
+  /Breaking one pool of machines/.test(text()),
+);
+
+/* ---- the case ---- */
+tab("The case");
+ok(
+  "a demand box per product per year, plus a CoV box",
+  all("input.dem").length === 7 * 4 + 7,
   "" + all("input.dem").length,
 );
 ok(
@@ -154,53 +217,50 @@ ok(
   all(".step").length === 39,
   "" + all(".step").length,
 );
+ok("a robustness table", /What robustness costs/.test(text()));
 ok("legend lists eight operations", all(".leg").length === 8);
 
+/* editing Year 1 demand breaks the reconciliation, and putting it back mends it */
 var first = all("input.dem")[0];
-ok("first demand is 450", first.value === "450", first.value);
+ok("the first box is P1 in Year 1", first.value === "450", first.value);
 first.value = "900";
 first.dispatchEvent(new w.Event("change", { bubbles: true }));
-ok("editing demand re-renders", all("input.dem")[0].value === "900");
-click(
-  all("#tabs .tab").filter(function (t) {
-    return /Capacity/.test(t.textContent);
-  })[0],
-);
+ok("the edit sticks", all("input.dem")[0].value === "900");
+tab("Capacity");
+ok("the banner turns amber", !!$(".banner-off"));
 ok(
-  "banner goes amber when the case drifts",
-  !!$(".banner-off"),
-  "banner stayed green after doubling P1 demand",
+  "and says Year 1 no longer reproduces slide 19",
+  /no longer reproduces slide 19/.test(text()),
 );
-ok(
-  "amber banner says it no longer matches",
-  /no longer matches slide 19/.test(text()),
-);
-
-// put it back and the banner returns to green
-click(
-  all("#tabs .tab").filter(function (t) {
-    return /The case/.test(t.textContent);
-  })[0],
-);
+tab("The case");
 var back = all("input.dem")[0];
 back.value = "450";
 back.dispatchEvent(new w.Event("change", { bubbles: true }));
-click(
-  all("#tabs .tab").filter(function (t) {
-    return /Capacity/.test(t.textContent);
-  })[0],
-);
-ok("banner returns to green", !!$(".banner-ok"));
+tab("Capacity");
+ok("the banner returns to green", !!$(".banner-ok"));
+ok("and the machines return to 27", machines() === 27, "" + machines());
 
-// the scope tab states plainly what is and is not modelled
-click(
-  all("#tabs .tab").filter(function (t) {
-    return /Scope/.test(t.textContent);
-  })[0],
+/* editing a later year must not disturb the reconciliation */
+tab("The case");
+var y4 = all("input.dem")[3];
+y4.value = "1200";
+y4.dispatchEvent(new w.Event("change", { bubbles: true }));
+tab("Capacity");
+ok("a Year 4 edit leaves the banner green", !!$(".banner-ok"));
+tab("The case");
+all("input.dem")[3].value = "690";
+all("input.dem")[3].dispatchEvent(new w.Event("change", { bubbles: true }));
+
+/* ---- scope ---- */
+tab("Scope and questions");
+ok("scope lists what is here", /In this version/.test(text()));
+ok("scope lists what is missing", /Not here yet/.test(text()));
+ok("scope carries the open questions", /Open questions/.test(text()));
+ok(
+  "scope mentions layout is not done",
+  /Layout: equipment inside a centre/.test(text()),
 );
-ok("scope tab lists what is missing", /Not here yet/.test(text()));
-ok("scope tab carries the open questions", /Open questions/.test(text()));
-ok("scope mentions multi-period is not done", /Several periods/.test(text()));
+ok("scope mentions the queue model", /Erlang C/.test(text()));
 
 console.log(
   (fails ? "FAILED " : "OK ") + (checks - fails) + "/" + checks + " checks",
