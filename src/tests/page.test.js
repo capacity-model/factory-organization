@@ -255,12 +255,36 @@ all("input.dem")[3].dispatchEvent(new w.Event("change", { bubbles: true }));
 tab("Scope and questions");
 ok("scope lists what is here", /In this version/.test(text()));
 ok("scope lists what is missing", /Not here yet/.test(text()));
-ok("scope carries the open questions", /Open questions/.test(text()));
-ok(
-  "scope mentions layout is not done",
-  /Layout: equipment inside a centre/.test(text()),
-);
 ok("scope mentions the queue model", /Erlang C/.test(text()));
+ok(
+  "scope says what the numbers rest on",
+  /What the numbers rest on/.test(text()),
+);
+ok(
+  "scope no longer carries questions for the professor",
+  !/Open questions/.test(text()),
+);
+ok(
+  "scope no longer claims layout is missing",
+  !/Layout: equipment inside a centre/.test(text()),
+);
+ok(
+  "scope no longer claims travel is missing",
+  !/Travel distance and traffic/.test(text()),
+);
+ok(
+  "scope no longer claims the groups are fixed",
+  !/Letting the user form the groups/.test(text()),
+);
+ok(
+  "scope lists the two levels of layout as done",
+  /Two levels of layout/.test(text()),
+);
+ok("scope lists the saved case as done", /saved to a file/.test(text()));
+ok(
+  "scope is honest about the footprints",
+  /rest on judgement alone/.test(text()),
+);
 
 /* ---- layout ---- */
 tab("Layout");

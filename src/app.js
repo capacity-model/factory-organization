@@ -1243,39 +1243,38 @@
     }
     wrap.appendChild(
       block("In this version", [
-        "The seven-product case with its routings, demand per year, variability and operation times, all editable.",
+        "The seven-product case of the organization design lecture, with its routings, demand for each of four years, demand variability, process times and machine footprints, all editable on the page.",
         "Required processors and utilization per centre, computed from demand and times alone.",
-        "Capacity sized for the mean or for a stated robustness, with what that robustness costs in machines.",
-        "The queue in front of every station, from Erlang C on its offered load.",
-        "Six organizations: product, group, fractal, function, process, holographic.",
-        "The organizational network, with the flow between centres and what stays inside one.",
-        "Four years of demand, the machines bought, moved and retired between them, and what the change costs.",
-        "A standing check that Year 1 at the mean still reproduces the counts on slide 19.",
+        "Capacity sized on the mean or for a stated robustness, and what that robustness costs in machines.",
+        "The wait in front of every station and the parts standing in it, from Erlang C on its offered load.",
+        "Six organizations: product, group, fractal, function, process and holographic, with the groups, the composite centres and the number of fractal centres formed on the page.",
+        "The organizational network, with the parts crossing between centres and the parts that never leave one.",
+        "Two levels of layout — the processors inside a centre, the centres inside the building — and the travel and floor area they imply.",
+        "Four years of demand in which one product is withdrawn, the machines bought, moved and retired between them, and what the change costs.",
+        "A case that can be saved to a file, loaded back, and reset to the lecture case.",
+        "A standing check that Year 1 on the mean still reproduces the processor counts drawn on slide 19.",
       ]),
     );
     wrap.appendChild(
       block(
         "Not here yet",
         [
-          "Layout: equipment inside a centre, and centres inside the factory.",
-          "Travel distance and traffic, as opposed to the number of moves.",
           "Work in process held between machines and between centres.",
-          "Operators, floor space, and operating cost as against capital.",
+          "Operators and operating cost, as against floor and capital.",
           "Setup times, which the lecture sets aside for now.",
-          "Letting the user form the groups and composite centres on the page.",
+          "Designs proposed by the tool rather than described to it.",
         ],
         "insight-soft",
       ),
     );
     wrap.appendChild(
       block(
-        "Open questions",
+        "What the numbers rest on",
         [
-          "A composite centre is modelled with processors flexible across its operations, as slide 67 does. That makes the process organization the leanest of all, below the function organization — so the function organization is the leanest only among dedicated-processor designs.",
-          "The holographic organization is modelled as the function organization's machines stood up as separate single-machine centres, each carrying an equal share. Is that the intended reading, or should instances be unequal?",
-          "Relocation and purchase prices are placeholders. Real figures would make the yearly comparison meaningful.",
-          "Slide 66 prints TOTAL 46 while its own column A2 B1 C4 D7 E4 F1 G1 H9 I13 J1 sums to 43, and the drawing shows 43 processors. The missing three may be the MP/PF blocks.",
-          "On slide 64 of the A-to-J case, operation I is drawn with 13 processors where the stated 86% utilization implies 12.",
+          "The seven products, their routings and the processor counts the tool is calibrated against are read off slides 3 and 19 of the organization design lecture, after Montreuil & Lefrancois (1996).",
+          "A period is one 20-hour workday at 80% processor efficiency, the convention of slide 64.",
+          "Demand and process times are synthetic. They were fitted by reverse calibration until the function organization in Year 1 computes exactly the counts drawn on slide 19, and the page re-checks that on every edit.",
+          "Machine footprints, the relocation price and the purchase price rest on judgement alone. Nothing on the slides fixes them, and the figures used here are meant to be replaced.",
         ],
         "insight-ask",
       ),
