@@ -100,6 +100,41 @@
 
   /* ---------------- shared header controls ---------------- */
 
+  function orgPicker(extra) {
+    var box = el("div", { class: "picker" });
+    Engine.ORGANIZATIONS.forEach(function (o) {
+      box.appendChild(
+        el("button", {
+          class: "pick " + (state.org === o.id ? "pick-on" : ""),
+          text: o.name.replace(" organization", ""),
+          onclick: function () {
+            state.org = o.id;
+            render();
+          },
+        }),
+      );
+    });
+    if (state.org === "fractal" && extra !== false) {
+      var f = el("span", { class: "ctl inline-ctl" }, [
+        el("span", { class: "ctl-k", text: "centres" }),
+      ]);
+      [2, 3, 4, 5].forEach(function (n) {
+        f.appendChild(
+          el("button", {
+            class: "mini-pick " + (CASE.fractalCount === n ? "mini-on" : ""),
+            text: String(n),
+            onclick: function () {
+              CASE.fractalCount = n;
+              render();
+            },
+          }),
+        );
+      });
+      box.appendChild(f);
+    }
+    return box;
+  }
+
   function controls(opts) {
     var bar = el("div", { class: "controls" });
     if (opts.period !== false) {
@@ -184,20 +219,7 @@
     wrap.appendChild(calibrationBanner());
     wrap.appendChild(controls({}));
 
-    var picker = el("div", { class: "picker" });
-    Engine.ORGANIZATIONS.forEach(function (o) {
-      picker.appendChild(
-        el("button", {
-          class: "pick " + (state.org === o.id ? "pick-on" : ""),
-          text: o.name.replace(" organization", ""),
-          onclick: function () {
-            state.org = o.id;
-            render();
-          },
-        }),
-      );
-    });
-    wrap.appendChild(picker);
+    wrap.appendChild(orgPicker());
 
     var r = Engine.evaluate(CASE, state.org, state.period, z());
     wrap.appendChild(el("p", { class: "blurb", text: r.org.blurb }));
@@ -210,6 +232,7 @@
       ["Bought for rounding", "+" + num(r.rounding, 2)],
       ["Average utilization", pct(r.utilization)],
       ["Average wait per visit", mins(r.avgWait)],
+      ["Parts waiting at any moment", num(r.waiting, 1)],
       ["Moves between centres", qty(r.flows.moves)],
     ].forEach(function (s) {
       stats.appendChild(
@@ -248,7 +271,13 @@
             el("td", { class: "r wide" }, [utilBar(s.utilization)]),
             el("td", {
               class: "r queue",
+              title: "mean wait before service",
               text: isFinite(s.queue.wait) ? num(s.queue.wait, 0) + "m" : "∞",
+            }),
+            el("td", {
+              class: "r queue",
+              title: "mean number of parts waiting",
+              text: isFinite(s.queue.length) ? num(s.queue.length, 1) : "∞",
             }),
           ]),
         );
@@ -262,7 +291,8 @@
       el("p", {
         class: "note",
         text:
-          "The last column is the mean wait before a part is served at that station, from Erlang C on " +
+          "The last two columns are the mean wait before a part is served at that station and " +
+          "the mean number of parts waiting in front of it, both from Erlang C on its offered load. " +
           "its offered load. A bar under about a third is the picture shown in class: a machine idle " +
           "most of the period because the centre it sits in is too small to keep it busy.",
       }),
@@ -276,20 +306,7 @@
     var wrap = el("div", {});
     wrap.appendChild(controls({ sl: false }));
 
-    var picker = el("div", { class: "picker" });
-    Engine.ORGANIZATIONS.forEach(function (o) {
-      picker.appendChild(
-        el("button", {
-          class: "pick " + (state.org === o.id ? "pick-on" : ""),
-          text: o.name.replace(" organization", ""),
-          onclick: function () {
-            state.org = o.id;
-            render();
-          },
-        }),
-      );
-    });
-    wrap.appendChild(picker);
+    wrap.appendChild(orgPicker());
 
     var r = Engine.evaluate(CASE, state.org, state.period, z());
     var f = r.flows;
@@ -523,21 +540,8 @@
     var L = lines.filter(function (x) {
       return x.org.id === state.org;
     })[0];
-    var picker = el("div", { class: "picker" });
-    Engine.ORGANIZATIONS.forEach(function (o) {
-      picker.appendChild(
-        el("button", {
-          class: "pick " + (state.org === o.id ? "pick-on" : ""),
-          text: o.name.replace(" organization", ""),
-          onclick: function () {
-            state.org = o.id;
-            render();
-          },
-        }),
-      );
-    });
     wrap.appendChild(el("h3", { class: "h3", text: "Year on year" }));
-    wrap.appendChild(picker);
+    wrap.appendChild(orgPicker());
 
     var st = el("table", { class: "big" });
     st.appendChild(
@@ -610,20 +614,7 @@
     var wrap = el("div", {});
     wrap.appendChild(controls({}));
 
-    var picker = el("div", { class: "picker" });
-    Engine.ORGANIZATIONS.forEach(function (o) {
-      picker.appendChild(
-        el("button", {
-          class: "pick " + (state.org === o.id ? "pick-on" : ""),
-          text: o.name.replace(" organization", ""),
-          onclick: function () {
-            state.org = o.id;
-            render();
-          },
-        }),
-      );
-    });
-    wrap.appendChild(picker);
+    wrap.appendChild(orgPicker());
 
     var L = Engine.layout(CASE, state.org, state.period, z());
     var stats = el("div", { class: "stats" });
@@ -814,6 +805,7 @@
         el("th", { class: "r", text: "For rounding" }),
         el("th", { class: "r", text: "Utilization" }),
         el("th", { class: "r", text: "Wait per visit" }),
+        el("th", { class: "r", text: "Parts waiting" }),
         el("th", { class: "r", text: "Moves between centres" }),
         el("th", { class: "r", text: "Travel" }),
         el("th", { class: "r", text: "Floor" }),
@@ -837,6 +829,7 @@
           el("td", { class: "r", text: "+" + num(r.rounding, 2) }),
           el("td", { class: "r", text: pct(r.utilization) }),
           el("td", { class: "r", text: mins(r.avgWait) }),
+          el("td", { class: "r", text: num(r.waiting, 1) }),
           el("td", { class: "r", text: qty(r.flows.moves) }),
           el("td", { class: "r", text: qty(lay[r.org.id].travel) + " m" }),
           el("td", {
@@ -988,15 +981,23 @@
       var route = el("span", { class: "route" });
       p.route.forEach(function (op, i) {
         if (i) route.appendChild(el("span", { class: "arrow", text: "→" }));
-        route.appendChild(
-          el("span", { class: "step" }, [
-            glyph(op, 16),
-            el("span", {
-              class: "step-t",
-              text: num(Engine.timeOf(CASE, op, p.id), 2),
-            }),
-          ]),
-        );
+        var t = el("input", {
+          class: "step-in",
+          type: "number",
+          min: "0.05",
+          max: "60",
+          step: "0.01",
+          value: String(Engine.timeOf(CASE, op, p.id)),
+          title: op + " on " + p.id + ", minutes per unit",
+        });
+        t.addEventListener("change", function () {
+          var v = Number(t.value);
+          if (isFinite(v) && v > 0) {
+            CASE.times[op][p.id] = v;
+            render();
+          }
+        });
+        route.appendChild(el("span", { class: "step" }, [glyph(op, 16), t]));
       });
       cells.push(el("td", { class: "l" }, [route]));
       t.appendChild(el("tr", {}, cells));
@@ -1059,6 +1060,156 @@
           "above, products independent of one another. Pooling seven products leaves the function " +
           "organization with a spread of only a few per cent, which is why 95% and 99% often land on the " +
           "same whole machines — a result worth showing rather than hiding.",
+      }),
+    );
+
+    wrap.appendChild(
+      el("h3", { class: "h3", text: "How the centres are formed" }),
+    );
+    var forms = el("div", { class: "forms" });
+
+    var gbox = el("div", { class: "form" });
+    gbox.appendChild(el("div", { class: "form-k", text: "Group centres" }));
+    CASE.groups.forEach(function (g, i) {
+      var inp = el("input", {
+        class: "text",
+        value: g.products.join(" "),
+        title: "products assigned to " + g.id,
+      });
+      inp.addEventListener("change", function () {
+        var want = inp.value
+          .toUpperCase()
+          .split(/[^A-Z0-9]+/)
+          .filter(Boolean);
+        var known = Engine.allProducts(CASE);
+        CASE.groups[i].products = want.filter(function (p) {
+          return known.indexOf(p) >= 0;
+        });
+        render();
+      });
+      gbox.appendChild(
+        el("div", { class: "form-row" }, [
+          el("span", { class: "form-id", text: g.id }),
+          inp,
+        ]),
+      );
+    });
+    var missing = Engine.allProducts(CASE).filter(function (p) {
+      return !CASE.groups.some(function (g) {
+        return g.products.indexOf(p) >= 0;
+      });
+    });
+    gbox.appendChild(
+      el("div", {
+        class: missing.length ? "form-warn" : "form-ok",
+        text: missing.length
+          ? "not in any group: " + missing.join(" ")
+          : "every product is in exactly one group",
+      }),
+    );
+    forms.appendChild(gbox);
+
+    var pbox = el("div", { class: "form" });
+    pbox.appendChild(el("div", { class: "form-k", text: "Composite centres" }));
+    CASE.processCenters.forEach(function (pc, i) {
+      var inp = el("input", {
+        class: "text",
+        value: pc.ops.join(" "),
+        title: "operations carried by " + pc.id,
+      });
+      inp.addEventListener("change", function () {
+        var want = inp.value
+          .toUpperCase()
+          .split(/[^A-Z0-9]+/)
+          .filter(Boolean);
+        var known = Engine.allOps(CASE);
+        CASE.processCenters[i].ops = want.filter(function (o) {
+          return known.indexOf(o) >= 0;
+        });
+        render();
+      });
+      pbox.appendChild(
+        el("div", { class: "form-row" }, [
+          el("span", { class: "form-id", text: pc.id }),
+          inp,
+        ]),
+      );
+    });
+    var uncovered = Engine.allOps(CASE).filter(function (o) {
+      return !CASE.processCenters.some(function (pc) {
+        return pc.ops.indexOf(o) >= 0;
+      });
+    });
+    pbox.appendChild(
+      el("div", {
+        class: uncovered.length ? "form-warn" : "form-ok",
+        text: uncovered.length
+          ? "not in any centre: " + uncovered.join(" ")
+          : "every operation is in a centre",
+      }),
+    );
+    forms.appendChild(pbox);
+    wrap.appendChild(forms);
+    wrap.appendChild(
+      el("p", {
+        class: "note",
+        text:
+          "An operation left out of every composite centre falls back to a centre of its own, so the " +
+          "process organization always makes all the parts. A product left out of every group is not " +
+          "made at all by the group organization, which the line above warns about.",
+      }),
+    );
+
+    wrap.appendChild(el("h3", { class: "h3", text: "Carry a case away" }));
+    var files = el("div", { class: "picker" });
+    files.appendChild(
+      el("button", {
+        class: "pick",
+        text: "Save this case",
+        onclick: saveCase,
+      }),
+    );
+    var file = el("input", {
+      type: "file",
+      accept: ".json",
+      class: "hidden-file",
+    });
+    file.addEventListener("change", function () {
+      var f = file.files && file.files[0];
+      if (!f) return;
+      var fr = new FileReader();
+      fr.onload = function () {
+        loadCase(String(fr.result));
+      };
+      fr.readAsText(f);
+    });
+    files.appendChild(
+      el("button", {
+        class: "pick",
+        text: "Load a case",
+        onclick: function () {
+          file.click();
+        },
+      }),
+    );
+    files.appendChild(
+      el("button", {
+        class: "pick",
+        text: "Back to the lecture case",
+        onclick: function () {
+          loadCase(JSON.stringify(ORIGINAL));
+        },
+      }),
+    );
+    files.appendChild(file);
+    wrap.appendChild(files);
+    wrap.appendChild(
+      el("p", {
+        class: "note",
+        text:
+          "Saving writes the whole case — products, routes, demand per year, variability, times, " +
+          "footprints, groups and prices — to a file. Loading one back replaces the case in the page, " +
+          "so a variant can be built, kept and handed on.",
       }),
     );
 
@@ -1130,6 +1281,78 @@
       ),
     );
     return wrap;
+  }
+
+  /* ---------------- carrying a case away ----------------
+   *
+   * The whole case travels as one JSON file, so a variant can be built in the
+   * page, kept, and handed to someone else. The lecture case is held aside at
+   * load so there is always a way back to the one the slides reconcile with.
+   */
+
+  var FIELDS = [
+    "period",
+    "operations",
+    "periods",
+    "products",
+    "times",
+    "drawn",
+    "groups",
+    "processCenters",
+    "fractalCount",
+    "money",
+    "space",
+    "serviceLevels",
+  ];
+
+  function snapshot() {
+    return FIELDS.reduce(function (a, k) {
+      a[k] = CASE[k];
+      return a;
+    }, {});
+  }
+
+  var ORIGINAL = JSON.parse(JSON.stringify(snapshot()));
+
+  function saveCase() {
+    var blob = new Blob([JSON.stringify(snapshot(), null, 1)], {
+      type: "application/json",
+    });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "factory-organization-case.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () {
+      URL.revokeObjectURL(url);
+    }, 0);
+  }
+
+  function loadCase(txt) {
+    var data;
+    try {
+      data = JSON.parse(txt);
+    } catch (e) {
+      window.alert("That file is not a saved case.");
+      return false;
+    }
+    var need = ["products", "operations", "times", "periods"];
+    var missing = need.filter(function (k) {
+      return !data[k];
+    });
+    if (missing.length) {
+      window.alert("That file has no " + missing.join(", ") + ".");
+      return false;
+    }
+    FIELDS.forEach(function (k) {
+      if (data[k] !== undefined) CASE[k] = JSON.parse(JSON.stringify(data[k]));
+    });
+    state.period = 0;
+    state.sl = 0;
+    render();
+    return true;
   }
 
   /* ---------------- shell ---------------- */

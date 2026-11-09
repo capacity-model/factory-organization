@@ -511,6 +511,16 @@ var Engine = (function () {
       // makes: the price of breaking one pool of machines into several
       avgWait: arrivals ? waited / arrivals : 0,
       visits: arrivals,
+      // parts standing in front of a machine at any moment, summed over the
+      // factory: the waiting quantities, as against the waiting time
+      waiting: centres.reduce(function (a, ct) {
+        return (
+          a +
+          ct.stations.reduce(function (b, s) {
+            return b + (isFinite(s.queue.length) ? s.queue.length : 0);
+          }, 0)
+        );
+      }, 0),
     };
   }
 

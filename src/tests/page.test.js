@@ -296,6 +296,124 @@ ok("compare carries travel", /Travel/.test(text()));
 ok("compare carries floor", /Floor/.test(text()));
 ok("compare closes the account", /the account closes/.test(text()));
 
+/* ---- waiting quantities, in his words as well as waiting time ---- */
+tab("Capacity");
+ok(
+  "two queue columns per station",
+  all(".queue").length >= 16,
+  "" + all(".queue").length,
+);
+ok("parts waiting is a headline", /Parts waiting at any moment/.test(text()));
+tab("Compare");
+ok("compare carries parts waiting", /Parts waiting/.test(text()));
+
+/* ---- the fractal centre count is adjustable ---- */
+tab("Capacity");
+pick("Fractal");
+ok(
+  "a centre-count control appears for the fractal organization",
+  all(".inline-ctl").length === 1,
+  "" + all(".inline-ctl").length,
+);
+var f3 = all(".centre").length;
+ok("three fractal centres by default", f3 === 3, "" + f3);
+var fourBtn = all(".inline-ctl .mini-pick").filter(function (b) {
+  return b.textContent === "4";
+})[0];
+ok("a button for four centres", !!fourBtn);
+click(fourBtn);
+ok(
+  "four fractal centres now",
+  all(".centre").length === 4,
+  "" + all(".centre").length,
+);
+ok("more centres need more machines", machines() > 33, "" + machines());
+click(
+  all(".inline-ctl .mini-pick").filter(function (b) {
+    return b.textContent === "3";
+  })[0],
+);
+ok("back to three", all(".centre").length === 3);
+pick("Function");
+ok(
+  "the control is hidden for other organizations",
+  all(".inline-ctl").length === 0,
+);
+
+/* ---- process times are editable ---- */
+tab("The case");
+ok(
+  "a time box for every step",
+  all("input.step-in").length === 39,
+  "" + all("input.step-in").length,
+);
+var t0 = all("input.step-in")[0];
+var was = t0.value;
+t0.value = "5";
+t0.dispatchEvent(new w.Event("change", { bubbles: true }));
+tab("Capacity");
+ok("a longer time breaks the reconciliation", !!$(".banner-off"));
+tab("The case");
+all("input.step-in")[0].value = was;
+all("input.step-in")[0].dispatchEvent(new w.Event("change", { bubbles: true }));
+tab("Capacity");
+ok("restoring it mends the reconciliation", !!$(".banner-ok"));
+ok("and the machines are back to 27", machines() === 27, "" + machines());
+
+/* ---- groups and composite centres are editable ---- */
+tab("The case");
+ok(
+  "a field per group and per composite centre",
+  all("input.text").length === 6,
+  "" + all("input.text").length,
+);
+ok(
+  "the cover of the groups is reported",
+  /every product is in exactly one group/.test(text()),
+);
+ok(
+  "the cover of the composite centres is reported",
+  /every operation is in a centre/.test(text()),
+);
+var g0 = all("input.text")[0];
+var gWas = g0.value;
+g0.value = "P1";
+g0.dispatchEvent(new w.Event("change", { bubbles: true }));
+ok("dropping products from a group is caught", /not in any group/.test(text()));
+all("input.text")[0].value = gWas;
+all("input.text")[0].dispatchEvent(new w.Event("change", { bubbles: true }));
+ok(
+  "restoring the group clears the warning",
+  /every product is in exactly one group/.test(text()),
+);
+
+/* ---- a case can be carried away ---- */
+ok(
+  "save, load and reset buttons",
+  all(".pick").filter(function (b) {
+    return /Save this case|Load a case|Back to the lecture case/.test(
+      b.textContent,
+    );
+  }).length === 3,
+);
+ok("a hidden file input", all("input.hidden-file").length === 1);
+
+/* the reset button restores the lecture case after an edit */
+var d0 = all("input.dem")[0];
+d0.value = "1234";
+d0.dispatchEvent(new w.Event("change", { bubbles: true }));
+tab("Capacity");
+ok("the edited case no longer reconciles", !!$(".banner-off"));
+tab("The case");
+click(
+  all(".pick").filter(function (b) {
+    return /Back to the lecture case/.test(b.textContent);
+  })[0],
+);
+tab("Capacity");
+ok("the reset button restores the lecture case", !!$(".banner-ok"));
+ok("and its 27 machines", machines() === 27, "" + machines());
+
 console.log(
   (fails ? "FAILED " : "OK ") + (checks - fails) + "/" + checks + " checks",
 );

@@ -64,14 +64,14 @@ turns amber the moment the function organization stops reproducing slide 19.
 
 Year 1, capacity sized on the mean:
 
-| Organization | Centres | Machines | For rounding | Utilization | Wait per visit | Moves between centres |    Travel |    Floor |
-| ------------ | ------: | -------: | -----------: | ----------: | -------------: | --------------------: | --------: | -------: |
-| Product      |       7 |       39 |       +14.70 |         62% |        5.0 min |                     0 | 195,412 m | 2,064 m² |
-| Group        |       3 |       33 |        +8.70 |         74% |        7.6 min |                     0 | 151,485 m | 1,411 m² |
-| Fractal, f=3 |       3 |       33 |        +8.70 |         74% |        6.2 min |                     0 | 157,734 m | 1,494 m² |
-| Function     |       8 |       27 |        +2.70 |         90% |        3.4 min |                13,500 | 498,812 m | 1,386 m² |
-| Process      |       3 |       26 |        +1.70 |         93% |        6.3 min |                 9,800 | 409,630 m | 1,675 m² |
-| Holographic  |      27 |       27 |        +2.70 |         90% |       12.7 min |                13,500 | 551,997 m | 1,698 m² |
+| Organization | Centres | Machines | For rounding | Utilization | Wait per visit | Parts waiting | Moves between centres |    Travel |    Floor |
+| ------------ | ------: | -------: | -----------: | ----------: | -------------: | ------------: | --------------------: | --------: | -------: |
+| Product      |       7 |       39 |       +14.70 |         62% |        5.0 min |          85.2 |                     0 | 195,412 m | 2,064 m² |
+| Group        |       3 |       33 |        +8.70 |         74% |        7.6 min |         130.3 |                     0 | 151,485 m | 1,411 m² |
+| Fractal, f=3 |       3 |       33 |        +8.70 |         74% |        6.2 min |         107.0 |                     0 | 157,734 m | 1,494 m² |
+| Function     |       8 |       27 |        +2.70 |         90% |        3.4 min |          58.6 |                13,500 | 498,812 m | 1,386 m² |
+| Process      |       3 |       26 |        +1.70 |         93% |        6.3 min |         108.6 |                 9,800 | 409,630 m | 1,675 m² |
+| Holographic  |      27 |       27 |        +2.70 |         90% |       12.7 min |         218.9 |                13,500 | 551,997 m | 1,698 m² |
 
 The work to be done is 24.30 processors' worth in every one of them. Four
 things are being traded, and each organization pays in a different currency:
@@ -85,8 +85,9 @@ things are being traded, and each organization pays in a different currency:
   function organization at the same utilization, yet a part waits 12.7 minutes
   against 3.4. Standing each machine up as its own centre costs nothing in
   capital and a great deal in queueing — five servers at 90% make a far shorter
-  queue than five single servers at 90% — and that is what buys the freedom to
-  place them anywhere.
+  queue than five single servers at 90%. At any moment 218.9 parts stand in front
+  of a machine against 58.6, and that is what buys the freedom to place them
+  anywhere.
 - **Floor.** The product organization needs 2,064 m² against the function
   organization's 1,386. The machines it buys have to stand somewhere.
 
@@ -157,9 +158,21 @@ rests on nothing but judgement.
 ## Not modelled yet
 
 - Work in process held between machines and between centres.
-- Operators, floor space, and operating cost as against capital.
+- Operators and operating cost, as against floor and capital.
 - Setup times, which the lecture sets aside for now.
-- Forming the groups and composite centres on the page rather than in the data.
+
+## Building a variant
+
+Everything the case is made of can be changed in the page: demand for each
+product in each year, the coefficient of variation of that demand, the minutes
+each operation takes on each product, which products form each group, which
+operations a composite centre carries, and how many centres the fractal
+organization is split into.
+
+The whole case travels as one JSON file. **Save this case** writes it out, **Load
+a case** reads one back, and **Back to the lecture case** restores the one the
+slides reconcile with. A variant can be built, kept and handed on, and the banner
+says at once whether it still reproduces slide 19.
 
 ## Built with
 
@@ -202,7 +215,7 @@ cd src && node build_standalone.js
 cd src && ./tests/run.sh
 ```
 
-381 checks across three suites: the engine, the calibration, the robustness
+420 checks across three suites: the engine, the calibration, the robustness
 model, Erlang C, the flow model, the two layout packers and the yearly timeline;
 the page under `jsdom`, driven through every tab and control; and the built
 single file. The layout checks assert that no two centres overlap, that every

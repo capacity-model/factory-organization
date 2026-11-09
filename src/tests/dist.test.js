@@ -36,6 +36,14 @@ ok("single file carries the timeline", /function timeline/.test(html));
 ok("single file carries the flow model", /function flows/.test(html));
 ok("single file carries the layout model", /function layout/.test(html));
 ok("single file carries the footprints", /insideCentre/.test(html));
+ok(
+  "single file carries the case files",
+  /factory-organization-case\.json/.test(html),
+);
+ok(
+  "single file carries the editable centre forms",
+  /How the centres are formed/.test(html),
+);
 
 var dom = new JSDOM(html, {
   runScripts: "dangerously",
@@ -60,7 +68,11 @@ w.document.addEventListener("DOMContentLoaded", function () {
       q(".mini-pick").length === 8,
       "" + q(".mini-pick").length,
     );
-    ok("dist reports a queue per station", q(".queue").length >= 8);
+    ok(
+      "dist reports wait and waiting quantity per station",
+      q(".queue").length >= 16,
+      "" + q(".queue").length,
+    );
     ok(
       "dist draws the network tab button",
       Array.prototype.slice.call(q("#tabs .tab")).some(function (b) {
