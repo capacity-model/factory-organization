@@ -632,9 +632,9 @@ var Engine = (function () {
   /* ---------------- two levels of layout ----------------
    *
    * The lower level packs an operation's processors inside their centre; the
-   * upper level packs the centres into the building. Both are shelf packing,
-   * which is crude but deterministic and good enough to turn a count of moves
-   * into a distance travelled, and a count of machines into floor area.
+   * upper level packs the centres into the building. Both are shelf packing:
+   * deterministic, and enough to turn a count of moves into a distance
+   * travelled, and a count of machines into floor area.
    *
    * Travel is rectilinear between centre centroids, as a vehicle on aisles
    * moves, and is what layout adds that a flow count alone cannot show.

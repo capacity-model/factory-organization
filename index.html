@@ -521,7 +521,7 @@
       <h1>Factory Organization Designer</h1>
       <p class="sub">
         The seven-product case from the organization design lecture, with the
-        numbers attached — ISyE 6202 / 6335, version 1
+        numbers attached — ISyE 6202 / 6335
       </p>
       <nav id="tabs"></nav>
     </header>
@@ -711,10 +711,9 @@ var CASE = {
   ],
   fractalCount: 3,
 
-  // The lecture case carries no prices. These are placeholders so the cost of
-  // changing a factory year on year has a shape; they are meant to be replaced
-  // with real figures. What matters is the ratio: moving a machine is cheaper
-  // than buying one, and that is what makes an inflexible organization expensive.
+  // The lecture case carries no prices, so these are the ones this case uses.
+  // What matters is the ratio: moving a machine is cheaper than buying one, and
+  // that is what makes an inflexible organization expensive.
   money: {
     install: 250000, // a new processor, delivered and installed
     relocate: 25000, // moving an existing processor to another centre
@@ -1377,9 +1376,9 @@ var Engine = (function () {
   /* ---------------- two levels of layout ----------------
    *
    * The lower level packs an operation's processors inside their centre; the
-   * upper level packs the centres into the building. Both are shelf packing,
-   * which is crude but deterministic and good enough to turn a count of moves
-   * into a distance travelled, and a count of machines into floor area.
+   * upper level packs the centres into the building. Both are shelf packing:
+   * deterministic, and enough to turn a count of moves into a distance
+   * travelled, and a count of machines into floor area.
    *
    * Travel is rectilinear between centre centroids, as a vehicle on aisles
    * moves, and is what layout adds that a flow count alone cannot show.
@@ -2231,8 +2230,8 @@ if (typeof module !== "undefined" && module.exports) {
         el("p", {
           class: "dim",
           text:
-            "The two prices are placeholders. The lecture case carries none, and the figures here are " +
-            "meant to be replaced; what matters to the comparison is that moving is far cheaper than buying.",
+            "The lecture case carries no prices; these are the ones this case uses, and they can be " +
+            "changed. What matters to the comparison is that moving is far cheaper than buying.",
         }),
       ]),
     );
@@ -2277,9 +2276,9 @@ if (typeof module !== "undefined" && module.exports) {
         el("p", {
           text:
             "The lower level packs an operation's processors inside their centre; the upper level packs " +
-            "the centres into the building, with a gangway between rows. Both are shelf packing, which " +
-            "is crude but deterministic — good enough to turn a count of moves into a distance travelled " +
-            "and a count of machines into floor area, and not good enough to be called a layout design.",
+            "the centres into the building, with a gangway between rows. Both are shelf packing: " +
+            "deterministic, and enough to turn a count of moves into a distance travelled and a count " +
+            "of machines into floor area. It sizes the space a design would need, and is not itself one.",
         }),
         el("p", {
           text:

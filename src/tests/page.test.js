@@ -185,7 +185,10 @@ ok(
 ok("a year-on-year breakdown", /Moved, not bought/.test(text()));
 ok("money is shown", /\$/.test(text()));
 ok("the composition point is made", /change in its composition/.test(text()));
-ok("the prices are flagged as placeholders", /placeholders/.test(text()));
+ok(
+  "the page says the prices are the case's own, not the lecture's",
+  /carries no prices/.test(text()),
+);
 
 /* ---- compare ---- */
 tab("Compare");

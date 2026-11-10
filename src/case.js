@@ -182,10 +182,9 @@ var CASE = {
   ],
   fractalCount: 3,
 
-  // The lecture case carries no prices. These are placeholders so the cost of
-  // changing a factory year on year has a shape; they are meant to be replaced
-  // with real figures. What matters is the ratio: moving a machine is cheaper
-  // than buying one, and that is what makes an inflexible organization expensive.
+  // The lecture case carries no prices, so these are the ones this case uses.
+  // What matters is the ratio: moving a machine is cheaper than buying one, and
+  // that is what makes an inflexible organization expensive.
   money: {
     install: 250000, // a new processor, delivered and installed
     relocate: 25000, // moving an existing processor to another centre

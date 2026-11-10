@@ -138,16 +138,16 @@ product declines, so a dying product keeps its capital and only loses its
 utilization. The fractal organization is the most expensive to grow, because
 capacity arrives one whole centre at a time.
 
-The install and relocation prices are placeholders — the lecture case carries
-none. What matters to the comparison is the ratio.
+The lecture case carries no prices, so the install and relocation figures are
+this case's own. What matters to the comparison is the ratio.
 
 ### Two levels of layout
 
 The lower level packs an operation's processors inside their centre; the upper
 level packs the centres into the building, with a gangway between rows. Both are
-shelf packing: crude but deterministic, good enough to turn a count of moves into
-a distance travelled and a count of machines into floor area, and not good enough
-to be called a layout design. Travel is rectilinear between centre centroids, the
+shelf packing: deterministic, and enough to turn a count of moves into a distance
+travelled and a count of machines into floor area. It sizes the space a design
+would need, and is not itself one. Travel is rectilinear between centre centroids, the
 way a vehicle on aisles moves.
 
 Machine footprints are an assumption. The slides draw the machines at different
@@ -155,11 +155,11 @@ sizes but give no dimensions, and unlike the demand and the times there is no
 count on a slide to calibrate them against. They are the one input here that
 rests on nothing but judgement.
 
-## Not modelled yet
+## Out of scope
 
 - Work in process held between machines and between centres.
 - Operators and operating cost, as against floor and capital.
-- Setup times, which the lecture sets aside for now.
+- Setup times, which the lecture sets aside.
 
 ## Building a variant
 

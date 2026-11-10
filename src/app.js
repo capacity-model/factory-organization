@@ -600,8 +600,8 @@
         el("p", {
           class: "dim",
           text:
-            "The two prices are placeholders. The lecture case carries none, and the figures here are " +
-            "meant to be replaced; what matters to the comparison is that moving is far cheaper than buying.",
+            "The lecture case carries no prices; these are the ones this case uses, and they can be " +
+            "changed. What matters to the comparison is that moving is far cheaper than buying.",
         }),
       ]),
     );
@@ -646,9 +646,9 @@
         el("p", {
           text:
             "The lower level packs an operation's processors inside their centre; the upper level packs " +
-            "the centres into the building, with a gangway between rows. Both are shelf packing, which " +
-            "is crude but deterministic — good enough to turn a count of moves into a distance travelled " +
-            "and a count of machines into floor area, and not good enough to be called a layout design.",
+            "the centres into the building, with a gangway between rows. Both are shelf packing: " +
+            "deterministic, and enough to turn a count of moves into a distance travelled and a count " +
+            "of machines into floor area. It sizes the space a design would need, and is not itself one.",
         }),
         el("p", {
           text:
