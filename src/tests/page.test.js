@@ -287,6 +287,145 @@ ok(
   "footprints are flagged as an assumption",
   /Machine footprints are an assumption/.test(text()),
 );
+
+/* ---- nothing on the plan is written over anything else ----
+ *
+ * Text cannot be measured in jsdom, so a label's width is estimated the way
+ * the page itself estimates it when it sizes the label. The check is that no
+ * label lands on a centre, on a dock, or on another label, in any
+ * organization, in any year, at any service level.
+ */
+function num(n, a) {
+  return parseFloat(n.getAttribute(a));
+}
+function hits(a, b) {
+  return a.x1 < b.x2 && b.x1 < a.x2 && a.y1 < b.y2 && b.y1 < a.y2;
+}
+function rectOf(r) {
+  return {
+    x1: num(r, "x"),
+    y1: num(r, "y"),
+    x2: num(r, "x") + num(r, "width"),
+    y2: num(r, "y") + num(r, "height"),
+  };
+}
+function textOf(t) {
+  var fz = parseFloat(t.getAttribute("font-size"));
+  var x = num(t, "x"),
+    y = num(t, "y");
+  var wide = t.textContent.length * 0.56 * fz;
+  var anchor = t.getAttribute("text-anchor");
+  var x1 = anchor === "end" ? x - wide : anchor === "start" ? x : x - wide / 2;
+  return { x1: x1, x2: x1 + wide, y1: y - fz * 0.78, y2: y + fz * 0.22 };
+}
+function circleOf(c) {
+  var r = num(c, "r");
+  return {
+    x1: num(c, "cx") - r,
+    x2: num(c, "cx") + r,
+    y1: num(c, "cy") - r,
+    y2: num(c, "cy") + r,
+  };
+}
+function planClashes() {
+  var bad = [];
+  var groups = all("svg.plan g");
+  var centres = groups.map(function (g) {
+    return rectOf(g.querySelector("rect"));
+  });
+  var labels = groups.map(function (g) {
+    return textOf(g.querySelector("text"));
+  });
+  var docks = all("svg.plan > circle").map(circleOf);
+  var dockNames = all("svg.plan > text").map(textOf);
+  labels.concat(dockNames).forEach(function (t, i) {
+    centres.forEach(function (c, j) {
+      if (hits(t, c)) bad.push("label " + i + " over centre " + j);
+    });
+    docks.forEach(function (d, j) {
+      if (hits(t, d)) bad.push("label " + i + " over dock " + j);
+    });
+    labels.concat(dockNames).forEach(function (u, j) {
+      if (j > i && hits(t, u)) bad.push("label " + i + " over label " + j);
+    });
+  });
+  docks.forEach(function (d, i) {
+    centres.forEach(function (c, j) {
+      if (hits(d, c)) bad.push("dock " + i + " over centre " + j);
+    });
+  });
+  return bad;
+}
+function minis(which) {
+  return all(".controls .ctl")[which].querySelectorAll(".mini-pick");
+}
+var clashes = [];
+["Product", "Group", "Fractal", "Function", "Process", "Holographic"].forEach(
+  function (org) {
+    pick(org);
+    for (var y = 0; y < minis(0).length; y++) {
+      click(minis(0)[y]);
+      for (var v = 0; v < minis(1).length; v++) {
+        click(minis(1)[v]);
+        planClashes().forEach(function (b) {
+          clashes.push(org + " year " + (y + 1) + " level " + v + ": " + b);
+        });
+      }
+    }
+    click(minis(0)[0]);
+    click(minis(1)[0]);
+  },
+);
+ok(
+  "no label on the plan overlaps a centre, a dock or another label",
+  clashes.length === 0,
+  clashes.slice(0, 4).join("; "),
+);
+
+/* ---- and nothing on the network diagram is written over anything either ---- */
+function netClashes() {
+  var bad = [];
+  var nodes = all("svg.net g").map(function (g) {
+    var c = g.querySelector("circle"),
+      t = g.querySelector("text");
+    return { c: circleOf(c), r: num(c, "r"), t: textOf(t) };
+  });
+  if (nodes.length < 3) bad.push("only " + nodes.length + " nodes drawn");
+  nodes.forEach(function (n, i) {
+    if (n.t.x2 - n.t.x1 > 2 * n.r - 1)
+      bad.push("name " + i + " wider than its node");
+    nodes.forEach(function (m, j) {
+      if (j <= i) return;
+      var dx = (n.c.x1 + n.c.x2) / 2 - (m.c.x1 + m.c.x2) / 2;
+      var dy = (n.c.y1 + n.c.y2) / 2 - (m.c.y1 + m.c.y2) / 2;
+      if (Math.sqrt(dx * dx + dy * dy) < n.r + m.r - 0.01)
+        bad.push("node " + i + " overlaps node " + j);
+    });
+  });
+  return bad;
+}
+var netBad = [];
+tab("Network");
+["Product", "Group", "Fractal", "Function", "Process", "Holographic"].forEach(
+  function (org) {
+    pick(org);
+    for (var y = 0; y < minis(0).length; y++) {
+      click(minis(0)[y]);
+      netClashes().forEach(function (b) {
+        netBad.push(org + " year " + (y + 1) + ": " + b);
+      });
+    }
+    click(minis(0)[0]);
+  },
+);
+ok(
+  "no node on the network diagram overlaps another, and every name fits inside its node",
+  netBad.length === 0,
+  netBad.slice(0, 4).join("; "),
+);
+tab("Layout");
+pick("Function");
+
 pick("Product");
 ok("a product organization still draws a plan", !!$("svg.plan"));
 ok(

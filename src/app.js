@@ -397,6 +397,10 @@
       var a = (i / ids.length) * Math.PI * 2 - Math.PI / 2;
       pos[id] = { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) };
     });
+    // A holographic organization puts 27 centres on the ring, so the nodes are
+    // drawn no larger than the gap between two of them allows.
+    var gap = (2 * Math.PI * R) / Math.max(1, ids.length);
+    var NODE_R = Math.max(7, Math.min(20, gap / 2 - 2));
     pos.IN = { x: 26, y: cy };
     pos.OUT = { x: W - 26, y: cy };
 
@@ -445,22 +449,27 @@
     function node(id, label, kind) {
       var p = pos[id];
       var g = svg("g", {});
-      var rad = kind === "end" ? 17 : 20;
+      var rad = kind === "end" ? Math.min(17, NODE_R) : NODE_R;
       g.appendChild(
         svg("circle", {
           cx: num(p.x, 1),
           cy: num(p.y, 1),
-          r: rad,
+          r: num(rad, 1),
           fill: kind === "end" ? "#eef1f5" : "#ffffff",
           stroke: kind === "end" ? "#9aa7b4" : "#1f5fa8",
           "stroke-width": 1.5,
         }),
       );
+      // and the name is written at whatever size keeps it inside its node
+      var fz = Math.min(
+        label.length > 4 ? 8 : 10,
+        (2 * rad - 5) / (label.length * 0.56),
+      );
       var t = svg("text", {
         x: num(p.x, 1),
-        y: num(p.y + 3.5, 1),
+        y: num(p.y + fz * 0.35, 1),
         "text-anchor": "middle",
-        "font-size": label.length > 4 ? 8 : 10,
+        "font-size": num(fz, 2),
         fill: "#1d2733",
       });
       t.textContent = label;
@@ -669,11 +678,27 @@
     return wrap;
   }
 
+  // Drawing constants for the plan. GLYPH is how wide a character runs as a
+  // share of the font size; it is what lets a label be fitted to its centre
+  // without measuring text.
+  var LABEL_SIZE = 2.2,
+    LABEL_DROP = 0.7,
+    GLYPH = 0.56,
+    ASIDE = 2.4,
+    DOCK_R = 2.2,
+    LABEL_MIN = 1.6;
+
+  // Whether a string can be written in the room given without dropping below
+  // the size at which it stops being readable.
+  function fitted(str, room) {
+    return room / (str.length * GLYPH) >= LABEL_MIN;
+  }
+
   function plan(L) {
     var box = el("div", { class: "diagram" });
     var W = L.building.w,
       H = L.building.h;
-    var m = 14;
+    var m = 18;
     var s = svg("svg", {
       viewBox: -m + " " + -m + " " + (W + 2 * m) + " " + (H + 2 * m),
       width: "100%",
@@ -724,38 +749,62 @@
           }),
         );
       });
-      var t = svg("text", {
-        x: num(c.x + c.w / 2, 1),
-        y: num(c.y - 1.2, 1),
-        "text-anchor": "middle",
-        "font-size": 2.6,
-        fill: "#5d6a79",
-      });
-      t.textContent = id.replace("F-", "") + " \u00b7 " + c.processors;
-      g.appendChild(t);
+      // The name is always there to hover for; what is written on the plan is
+      // whatever will fit.
+      var name = id.replace("F-", "") + " \u00b7 " + c.processors;
+      g.appendChild(svg("title", {})).textContent =
+        name + (c.processors === 1 ? " processor" : " processors");
+
+      // The label sits in the aisle above its centre: small enough to clear the
+      // row above, and narrow enough to stay inside its own centre plus half the
+      // aisle either side. Where the full name will not fit legibly the count
+      // alone is written, and where that will not fit either nothing is.
+      // Room is the centre's own width plus half the aisle either side, cut
+      // back at the walls so that a label on the edge is made smaller rather
+      // than shunted sideways into its neighbour.
+      var room = Math.min(c.w + ASIDE, 2 * c.x + c.w, 2 * (W - c.x) - c.w);
+      var shown = fitted(name, room)
+        ? name
+        : fitted("" + c.processors, room)
+          ? "" + c.processors
+          : "";
+      if (shown) {
+        var fs = Math.min(LABEL_SIZE, room / (shown.length * GLYPH));
+        var t = svg("text", {
+          x: num(c.x + c.w / 2, 1),
+          y: num(c.y - LABEL_DROP, 1),
+          "text-anchor": "middle",
+          "font-size": num(fs, 2),
+          fill: "#5d6a79",
+        });
+        t.textContent = shown;
+        g.appendChild(t);
+      }
       box.appendChild(document.createTextNode(""));
       s.appendChild(g);
     });
 
+    // The docks sit against the outside of the wall, where they cannot cover a
+    // centre, and their names sit further out still.
     [
-      ["IN", 0, H / 2],
-      ["OUT", W, H / 2],
+      ["IN", -DOCK_R, "end", -2 * DOCK_R - 1.4],
+      ["OUT", W + DOCK_R, "start", W + 2 * DOCK_R + 1.4],
     ].forEach(function (d) {
       s.appendChild(
         svg("circle", {
           cx: num(d[1], 1),
-          cy: num(d[2], 1),
-          r: 2.2,
+          cy: num(H / 2, 1),
+          r: DOCK_R,
           fill: "#eef1f5",
           stroke: "#9aa7b4",
           "stroke-width": 0.6,
         }),
       );
       var t = svg("text", {
-        x: num(d[1], 1),
-        y: num(d[2] + 5.5, 1),
-        "text-anchor": "middle",
-        "font-size": 2.6,
+        x: num(d[3], 1),
+        y: num(H / 2 + 0.9, 1),
+        "text-anchor": d[2],
+        "font-size": LABEL_SIZE,
         fill: "#5d6a79",
       });
       t.textContent = d[0];
