@@ -293,7 +293,7 @@
         text:
           "The last two columns are the mean wait before a part is served at that station and " +
           "the mean number of parts waiting in front of it, both from Erlang C on its offered load. " +
-          "its offered load. A bar under about a third is the picture shown in class: a machine idle " +
+          "A bar under about a third is the picture shown in class: a machine idle " +
           "most of the period because the centre it sits in is too small to keep it busy.",
       }),
     );
